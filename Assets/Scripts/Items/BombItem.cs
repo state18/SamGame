@@ -8,7 +8,7 @@ public class BombItem : Item
 	//private float cooldown = 0f;
 	public float timeUntilDetonation;
 	private int ongoingBombs;         //no more than 2 at a time
-	PlayerController pc;
+	Player player;
 	
 	public BombItem ()
 	{
@@ -19,7 +19,7 @@ public class BombItem : Item
 	// Use this for initialization
 	void Start ()
 	{
-		pc = bombSpawn.GetComponentInParent<PlayerController> ();
+        player = FindObjectOfType<Player>();
 	}
 	
 	// Update is called once per frame
@@ -27,8 +27,8 @@ public class BombItem : Item
 	{
 		//if (cooldown > 0)
 		//	cooldown -= Time.deltaTime;
-		
-		if (InHand && Input.GetKeyDown (KeyCode.X) && !pc.isClimbing) {
+		// TODO handle climbing later.
+		if (InHand && Input.GetKeyDown (KeyCode.X)) {
 			Use ();
 		}
 	}

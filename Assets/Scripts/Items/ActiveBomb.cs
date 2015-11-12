@@ -8,7 +8,7 @@ public class ActiveBomb : MonoBehaviour
 	public float blastRadius;
 	Animator bombAnimator;
 	Rigidbody2D rb;
-	public LayerMask destructable;
+	public LayerMask canBeHit;
 	public GameObject detonationParticle;
 	
 	// Use this for initialization
@@ -25,22 +25,20 @@ public class ActiveBomb : MonoBehaviour
 		
 		if (lifetime < 0) {
 			Instantiate (detonationParticle, transform.position, transform.rotation);
-			Collider2D[] bombHit = Physics2D.OverlapCircleAll (new Vector2 (transform.position.x, transform.position.y), blastRadius, destructable);
+            // Every Collider2D on an object on the "Destructable" layer will be stored.
+			Collider2D[] bombHit = Physics2D.OverlapCircleAll (new Vector2 (transform.position.x, transform.position.y), blastRadius, canBeHit);
 			
 			foreach (Collider2D n in bombHit) {
-				if (n.tag == "Player") {
-					n.GetComponent<HealthManager> ().HurtPlayer (damage);
-				} else if (n.tag == "Enemy") {
-					n.GetComponent<EnemyHealthManager> ().giveDamage (damage);
-				} else if (n.tag == "Destructable") {
-					n.GetComponent<Destructable> ().Explode ();
-				} else if (n.tag == "Lever") {
-					var leverControl = n.GetComponent<LeverBehavior> ();
-					if (!leverControl.isOn) {
-						leverControl.TellDoorOpen ();
-					} else if (leverControl.isOn)
-						leverControl.TellDoorClose ();
-				}
+
+                var takeDamage = (ITakeDamage)n.GetComponent(typeof(ITakeDamage));
+                if (takeDamage != null)
+                    takeDamage.TakeDamage(damage, gameObject);
+                else{
+                    var destructable = n.GetComponent<Destructable>();
+                    if (destructable != null)
+                        destructable.DestroyMe();
+                }
+				// TODO Handle scenario for destructables and possibly lever toggling!
 			}
 			Destroy (gameObject);
 		} else if (lifetime < 1) {
