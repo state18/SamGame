@@ -62,6 +62,8 @@ public class LevelManagerProto : MonoBehaviour {
                 canRespawn.RespawnMe();
             }
         }
+        // After enemies are respawned, empty the list.
+        ClearDeadEnemies();
 
         Camera.IsFollowing = true;
 
@@ -71,5 +73,9 @@ public class LevelManagerProto : MonoBehaviour {
 
     public void AddDeadEnemy(GameObject enemy) {
         deadEnemies.Add(enemy);
+    }
+
+    public void ClearDeadEnemies() {
+        deadEnemies.Clear();
     }
 }

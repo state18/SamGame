@@ -58,12 +58,14 @@ public class PatrollingEnemy : MonoBehaviour, ITakeDamage, IRespawnable {
 
     public void KillMe() {
         IsDead = true;
-        // TODO Play death effect here!
+        if (DestroyedEffect != null)
+            Instantiate(DestroyedEffect, transform.position, transform.rotation);
         LevelManagerProto.Instance.AddDeadEnemy(gameObject);
         gameObject.SetActive(false);
     }
 
     public void RespawnMe() {
+        transform.position = startPosition;
         IsDead = false;
         Health = MaxHealth;
     }

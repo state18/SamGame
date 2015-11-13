@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class LaserBotSingle : MonoBehaviour
 {
@@ -76,10 +77,4 @@ public class LaserBotSingle : MonoBehaviour
 		fireSound.Play ();
 		shotDelayCounter = shotDelay;
 	}
-
-
-
-
-
-
 }

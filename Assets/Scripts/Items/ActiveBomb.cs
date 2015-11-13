@@ -8,7 +8,6 @@ public class ActiveBomb : MonoBehaviour
 	public float blastRadius;
 	Animator bombAnimator;
 	Rigidbody2D rb;
-	public LayerMask canBeHit;
 	public GameObject detonationParticle;
 	
 	// Use this for initialization
@@ -25,8 +24,8 @@ public class ActiveBomb : MonoBehaviour
 		
 		if (lifetime < 0) {
 			Instantiate (detonationParticle, transform.position, transform.rotation);
-            // Every Collider2D on an object on the "Destructable" layer will be stored.
-			Collider2D[] bombHit = Physics2D.OverlapCircleAll (new Vector2 (transform.position.x, transform.position.y), blastRadius, canBeHit);
+            // Every Collider2D within the blast radius will be captured in this array
+			Collider2D[] bombHit = Physics2D.OverlapCircleAll (new Vector2 (transform.position.x, transform.position.y), blastRadius);
 			
 			foreach (Collider2D n in bombHit) {
 
