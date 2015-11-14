@@ -1,7 +1,10 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
-
+/// <summary>
+/// These parameters tell the CharacterController2D what limits the entity has.
+/// Instances of this class are held by ControllerPhysicsVolume2D for area of effect changes, and by CharacterController2D for default parameters.
+/// </summary>
 [Serializable]
 public class ControllerParameters2D {
     public enum JumpBehavior {

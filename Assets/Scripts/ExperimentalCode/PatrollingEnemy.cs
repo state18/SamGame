@@ -15,7 +15,6 @@ public class PatrollingEnemy : MonoBehaviour, ITakeDamage, IRespawnable {
     private Vector2 direction;
     // The starting position of the enemy is remembered for respawning purposes.
     private Vector2 startPosition;
-    private float canFireIn;
 
     public void Start() {
         controller = GetComponent<CharacterController2D>();
@@ -34,19 +33,6 @@ public class PatrollingEnemy : MonoBehaviour, ITakeDamage, IRespawnable {
                 direction = -direction;
                 transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
             }
-            /*
-            //Check to see if the enemy needs to shoot
-            if ((canFireIn -= Time.deltaTime) > 0)
-                return;
-
-            var raycast = Physics2D.Raycast(transform.position, direction, 10, 1 << LayerMask.NameToLayer("Player"));
-            if (!raycast)
-                return;
-
-            var projectile = (Projectile)Instantiate(Projectile, transform.position, transform.rotation);
-            projectile.Initialize(gameObject, direction, controller.Velocity);
-            canFireIn = FireRate;
-            */
         }
     }
     public void TakeDamage(int damage, GameObject instigator) {
@@ -60,6 +46,7 @@ public class PatrollingEnemy : MonoBehaviour, ITakeDamage, IRespawnable {
         IsDead = true;
         if (DestroyedEffect != null)
             Instantiate(DestroyedEffect, transform.position, transform.rotation);
+
         LevelManagerProto.Instance.AddDeadEnemy(gameObject);
         gameObject.SetActive(false);
     }

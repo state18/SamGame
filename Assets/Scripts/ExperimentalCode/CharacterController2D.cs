@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+/// <summary>
+/// This class acts as the controller for physical movement for entities. It is essentially a replacement for the Rigidbody2D component.
+/// </summary>
 public class CharacterController2D : MonoBehaviour {
 
     // "Skin" is how far inside the player do the rays begin?
@@ -19,7 +21,8 @@ public class CharacterController2D : MonoBehaviour {
     public Vector2 Velocity { get { return _velocity; } }
     public bool HandleCollisions { get; set; }
     // If Parameters != null, return _overrideParameters, else return DefaultParameters
-    public ControllerParameters2D Parameters { get { return _overrideParameters ?? DefaultParameters; } }
+    public ControllerParameters2D Parameters { get { return OverrideParameters ?? DefaultParameters; } }
+    public ControllerParameters2D OverrideParameters { get; set; }
     public GameObject StandingOn { get; private set; }
     public Vector3 PlatformVelocity { get; private set; }
 
@@ -39,7 +42,7 @@ public class CharacterController2D : MonoBehaviour {
     private Transform _transform;
     private Vector3 _localScale;
     private BoxCollider2D _boxCollider;
-    private ControllerParameters2D _overrideParameters;
+    
     private float _jumpIn;
     private GameObject _lastStandingOn;
 
@@ -338,7 +341,7 @@ public class CharacterController2D : MonoBehaviour {
         if (parameters == null)
             return;
 
-        _overrideParameters = parameters.Parameters;
+        OverrideParameters = parameters.Parameters;
     }
 
     public void OnTriggerExit2D(Collider2D other) {
@@ -346,6 +349,6 @@ public class CharacterController2D : MonoBehaviour {
         if (parameters == null)
             return;
 
-        _overrideParameters = null;
+        OverrideParameters = null;
     }
 }

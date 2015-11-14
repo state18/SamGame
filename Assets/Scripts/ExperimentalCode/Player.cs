@@ -11,6 +11,7 @@ public class Player : MonoBehaviour, ITakeDamage {
     private ItemManager itemManager;
     private SpriteRenderer playerSprite;
     private float _normalizedHorizontalSpeed;
+    private float _normalizedVerticalSpeed;
 
     // How fast can the player move?
     public float MaxSpeed = 8;
@@ -31,6 +32,25 @@ public class Player : MonoBehaviour, ITakeDamage {
     public Toggle[] hearts;
     public bool IsInvulnerable { get; private set; }
 
+    // State information specific to the player. This code is here instead of CharacterController since as of right now, climbing is restricted to being
+    // something only the player can do.
+    public ControllerParameters2D climbingParameters;
+    public bool CanClimb { get; set; }
+    private bool isClimbing;
+
+    public bool IsClimbing {
+        get {
+            return isClimbing;
+        }
+        set {
+            if (value)
+                _controller.OverrideParameters = climbingParameters;
+            else
+                _controller.OverrideParameters = null;
+
+            isClimbing = value;
+        }
+    }
     // How long until the player can shoot next projectile?
     //private float _canFireIn;
 
@@ -41,7 +61,7 @@ public class Player : MonoBehaviour, ITakeDamage {
         itemManager = FindObjectOfType<ItemManager>();
         playerSprite = GetComponent<SpriteRenderer>();
         //TODO maybe find a better way to handle audio source organization.
-        ouchEffect = GetComponent<AudioSource>();  
+        ouchEffect = GetComponent<AudioSource>();
         _isFacingRight = transform.localScale.x > 0;
 
         FullHealth();
@@ -58,6 +78,8 @@ public class Player : MonoBehaviour, ITakeDamage {
         // Movement factor determines distance per frame based on location ie ground, air, water, etc...
         if (IsDead)
             _controller.SetHorizontalForce(0);
+        else if (IsClimbing)
+            _controller.SetForce(new Vector2(_normalizedHorizontalSpeed * MaxSpeed * 20 * Time.deltaTime, _normalizedVerticalSpeed * MaxSpeed * 20 * Time.deltaTime));
         else
             _controller.SetHorizontalForce(Mathf.Lerp(_controller.Velocity.x, _normalizedHorizontalSpeed * MaxSpeed, Time.deltaTime * movementFactor));
 
@@ -121,17 +143,15 @@ public class Player : MonoBehaviour, ITakeDamage {
     }
     // TODO Refactor to use GetAxisRaw
     private void HandleInput() {
-        if (Input.GetKey(KeyCode.RightArrow)) {
-            _normalizedHorizontalSpeed = 1;
+        _normalizedHorizontalSpeed = Input.GetAxisRaw("Horizontal");
+        _normalizedVerticalSpeed = Input.GetAxisRaw("Vertical");
+
+        if (_normalizedHorizontalSpeed == 1) {
             if (!_isFacingRight)
                 Flip();
-        } else if (Input.GetKey(KeyCode.LeftArrow)) {
-            _normalizedHorizontalSpeed = -1;
+        } else if (_normalizedHorizontalSpeed == -1)
             if (_isFacingRight)
                 Flip();
-        } else {
-            _normalizedHorizontalSpeed = 0;
-        }
 
         if (_controller.CanJump && Input.GetButtonDown("Jump")) {
             _controller.Jump();

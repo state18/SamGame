@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+/// <summary>
+/// Various states of an entity are held here and are used in conditional statements when determining movement.
+/// For example: If IsCollidingRight is true, then the entity's position must be updated so it doesn't go through whatever it is colliding with.
+/// </summary>
 public class ControllerState2D {
     public bool IsCollidingRight { get; set; }
     public bool IsCollidingLeft { get; set; }
@@ -10,8 +13,6 @@ public class ControllerState2D {
     public bool IsMovingUpSlope { get; set; }
     public bool IsGrounded { get { return IsCollidingBelow; } }
     public float SlopeAngle { get; set; }
-    // TODO finish climbing code. This is experimental.
-    public bool IsClimbing { get; set; }
 
     public bool HasCollisions { get { return IsCollidingRight || IsCollidingLeft || IsCollidingAbove || IsCollidingBelow; } }
 

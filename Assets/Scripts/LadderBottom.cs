@@ -17,23 +17,25 @@ public class LadderBottom : MonoBehaviour {
 
             if (Input.GetAxisRaw("Vertical") == -1) {
 
-                //player.isClimbing = false;
+                player.IsClimbing = false;
 
             } else if (Input.GetAxisRaw("Vertical") == 1) {
 
-                //player.isClimbing = true;
+                player.IsClimbing = true;
             }
 
         }
     }
 
     void OnTriggerEnter2D(Collider2D other) {
-        if (other.tag == "PlayerTrigger")
+        if (other.tag == "Player")
             inside = true;
     }
 
     void OnTriggerExit2D(Collider2D other) {
-        if (other.tag == "PlayerTrigger")
+        if (other.tag == "Player") {
             inside = false;
+            player.IsClimbing = false;
+        }
     }
 }
