@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+[System.Obsolete("Check for ITakeDamage instead", true)]
 public class HurtEnemy : MonoBehaviour		//This script will damage enemies on contact
 {
 	public int damageToGive;				//How much damage will the enemy take?

@@ -6,7 +6,7 @@ public class BulletController : MonoBehaviour
 
 	public float speed;					//how fast does the bullet travel?
 
-	public PlayerController player;
+	public Player player;
 
 	//TODO make particle effect here
 
@@ -16,7 +16,7 @@ public class BulletController : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
-		player = FindObjectOfType<PlayerController> ();
+		player = FindObjectOfType<Player> ();
 
 		if (player.transform.localScale.x < 0) {			//direction of shot changes with player's facing direction
 			speed = -speed;
@@ -44,6 +44,8 @@ public class BulletController : MonoBehaviour
 		//TODO if(other.tag == "Enemy"){
 		//	Instantiate (enemyDeathEffect, other.transform.position, other.transform.rotation);
 		//}
+        
+        // TODO Handle damaging enemies and interacting with other terrain. (same way as the sword and bomb most likely)
 
 		if (other.tag == "MapGround" || other.tag == "Enemy" || other.tag == "Solid" || other.tag == "Destructable") {
 			Instantiate (impactEffect, transform.position, transform.rotation);

@@ -3,6 +3,9 @@ using UnityEngine.UI;
 using System.Collections;
 using System;
 // TODO think about adding Health Manager separately ?
+/// <summary>
+/// The Player class handles actions specific to the player. A lot of these actions interact with the CharacterController2D class.
+/// </summary>
 public class Player : MonoBehaviour, ITakeDamage {
     private bool _isFacingRight;
     private CharacterController2D _controller;
@@ -45,10 +48,12 @@ public class Player : MonoBehaviour, ITakeDamage {
         set {
             if (value)
                 _controller.OverrideParameters = climbingParameters;
-            else
+            else {
                 _controller.OverrideParameters = null;
-
+                _animator.speed = 1;
+            }
             isClimbing = value;
+            _animator.SetBool("isClimbing", IsClimbing);
         }
     }
     // How long until the player can shoot next projectile?
@@ -165,11 +170,19 @@ public class Player : MonoBehaviour, ITakeDamage {
     private void HandleAnimation() {
 
         _animator.SetFloat("playerSpeed", _controller.Velocity.magnitude > .5f ? 1 : 0);
+
+        // If climbing and moving, the animation speed should be normal or "1". If not moving, then the speed should be 0.
+        if (IsClimbing)
+            if (_controller.Velocity.magnitude > .5f)
+                _animator.speed = 1;
+            else
+                _animator.speed = 0;
+
+
         _animator.SetBool("Ground", _controller.StandingOn != null);
 
-
     }
-    // TODO merge with current projectile system.
+    // TODO IMPORTANT! This shows how to properly use the new projectile system! Use this with pistol item.
     /*
     private void FireProjectile() {
         if (_canFireIn > 0)

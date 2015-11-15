@@ -1,12 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+/// <summary>
+/// Controls how the pistol item works. For information on the bullets that are fired from the pistol,
+/// check out the BulletController class.
+/// </summary>
 public class PistolItem : Item
 {
+    // TODO Use new projectile system for the bullets!
 	public Transform firePoint;
 	public GameObject bulletPrefab;	
 	private Animator playerAnim;
-	private PlayerController pc;
+	private Player player;
 
 	private int ongoingShots;
 	private float cooldown = 0f;
@@ -21,8 +25,9 @@ public class PistolItem : Item
 	// Use this for initialization
 	void Start ()
 	{
-		playerAnim = firePoint.GetComponentInParent<Animator> ();
-		pc = firePoint.GetComponentInParent<PlayerController> ();
+        player = FindObjectOfType<Player>();
+        playerAnim = player.GetComponent<Animator>();
+        
 	}
 	
 	// Update is called once per frame
@@ -30,8 +35,8 @@ public class PistolItem : Item
 	{
 		if (cooldown > 0)
 			cooldown -= Time.deltaTime;
-
-		if (InHand && Input.GetKeyDown (KeyCode.X) && !pc.isClimbing) {
+        // TODO Handle interaction with climbing.
+		if (InHand && Input.GetKeyDown (KeyCode.X)) {
 			Use ();
 		}
 	}

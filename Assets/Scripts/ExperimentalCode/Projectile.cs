@@ -11,6 +11,7 @@ public abstract class Projectile : MonoBehaviour {
     public Vector2 Direction { get; private set; }
     public Vector2 InitialVelocity { get; private set; }
 
+    // TODO go back and watch tutorial. May have missed something as this method is never called!
     public void Initialize(GameObject owner, Vector2 direction, Vector2 initialVelocity) {
         transform.right = direction;
         Owner = owner;

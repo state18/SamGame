@@ -2,12 +2,11 @@
 using System.Collections;
 
 public class LadderTop : MonoBehaviour {
-    // TODO As of 11/13/2015, this object's collision is on Ground layer, adjust accordingly and tweak the transitions.
+    // TODO Make smooth transitions when exiting through the tops of ladders. 
+    // Maybe have a very brief window of time where an animation plays and prevents the player from moving.
     Player player;
 
     Animator anim;
-
-    public float yOffset;
 
     // Use this for initialization
     void Start() {
@@ -25,21 +24,26 @@ public class LadderTop : MonoBehaviour {
 
 
             if (!player.IsClimbing && Input.GetAxisRaw("Vertical") == -1) {
+                var yOffset = other.GetComponent<BoxCollider2D>().size.y / 2;
+                // The amount we translate should be the difference between the destination point and the current center of the player's collider.
+                Vector3 desiredDestination = new Vector3(transform.position.x, transform.position.y - yOffset + .2f, transform.position.z);
 
-                other.transform.position = new Vector3(transform.position.x, other.transform.position.y, other.transform.position.z);
-                other.transform.Translate(0f, yOffset, 0f);
+                other.transform.position = desiredDestination;
 
-                player.CanClimb = true;
+                //player.CanClimb = true;
                 player.IsClimbing = true;
 
             } else if (player.IsClimbing && Input.GetAxisRaw("Vertical") == 1) {
 
-                anim.SetTrigger("LadderExit");
-                other.transform.position = new Vector3(other.transform.position.x, other.transform.position.y, other.transform.position.z);
-                other.transform.Translate(0f, -yOffset, 0f);
+                // anim.SetTrigger("LadderExit");
+                var yOffset = other.GetComponent<BoxCollider2D>().size.y / 2;
+                // The amount we translate should be the difference between the destination point and the current center of the player's collider.
+                Vector3 desiredDestination = new Vector3(transform.position.x, transform.position.y + yOffset, transform.position.z);
+
+                other.transform.position = desiredDestination;
 
 
-                player.CanClimb = false;
+                //player.CanClimb = false;
                 player.IsClimbing = false;
 
 
@@ -47,4 +51,10 @@ public class LadderTop : MonoBehaviour {
         }
 
     }
+    /*
+    void OnTriggerExit2D(Collider2D other) {
+        if (other.tag == "Player")
+            player.IsClimbing = false;
+    }
+    */
 }
