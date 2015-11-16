@@ -14,8 +14,10 @@ public class SimpleProjectile : Projectile, ITakeDamage {
             DestroyProjectile();
             return;
         }
+        // Probably not necessary for my game. Perhaps save this code for an overloaded constructor method.
+        // transform.Translate(Direction * ((Mathf.Abs(InitialVelocity.x) + Speed) * Time.deltaTime), Space.World);
 
-        transform.Translate(Direction * ((Mathf.Abs(InitialVelocity.x) + Speed) * Time.deltaTime), Space.World);
+        transform.Translate(Direction * Speed * Time.deltaTime, Space.World);
     }
     public void TakeDamage(int damage, GameObject instigator) {
         // Possible area to award points to play for destroying this projectile

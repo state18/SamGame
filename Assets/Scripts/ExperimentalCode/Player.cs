@@ -7,7 +7,7 @@ using System;
 /// The Player class handles actions specific to the player. A lot of these actions interact with the CharacterController2D class.
 /// </summary>
 public class Player : MonoBehaviour, ITakeDamage {
-    private bool _isFacingRight;
+    
     private CharacterController2D _controller;
     private Animator _animator;
     private BuffManager buffManager;
@@ -22,6 +22,7 @@ public class Player : MonoBehaviour, ITakeDamage {
     // How quickly can the player's velocity change?
     public float SpeedAccelerationOnGround = 10f;
     public float SpeedAccelerationInAir = 5f;
+    public bool IsFacingRight { get; private set; }
     public int MaxHealth = 3;
     public AudioSource ouchEffect;          // On damage effect
     public Projectile Projectile;            // TODO merge this with current projectile system.
@@ -67,7 +68,7 @@ public class Player : MonoBehaviour, ITakeDamage {
         playerSprite = GetComponent<SpriteRenderer>();
         //TODO maybe find a better way to handle audio source organization.
         ouchEffect = GetComponent<AudioSource>();
-        _isFacingRight = transform.localScale.x > 0;
+        IsFacingRight = transform.localScale.x > 0;
 
         FullHealth();
     }
@@ -101,7 +102,7 @@ public class Player : MonoBehaviour, ITakeDamage {
     }
 
     public void RespawnAt(Transform spawnPoint) {
-        if (!_isFacingRight)
+        if (!IsFacingRight)
             Flip();
 
         IsDead = false;
@@ -152,10 +153,10 @@ public class Player : MonoBehaviour, ITakeDamage {
         _normalizedVerticalSpeed = Input.GetAxisRaw("Vertical");
 
         if (_normalizedHorizontalSpeed == 1) {
-            if (!_isFacingRight)
+            if (!IsFacingRight)
                 Flip();
         } else if (_normalizedHorizontalSpeed == -1)
-            if (_isFacingRight)
+            if (IsFacingRight)
                 Flip();
 
         if (_controller.CanJump && Input.GetButtonDown("Jump")) {
@@ -200,7 +201,7 @@ public class Player : MonoBehaviour, ITakeDamage {
     // Flips the player over the y axis by negating the current x property of local scale
     private void Flip() {
         transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
-        _isFacingRight = transform.localScale.x > 0;
+        IsFacingRight = transform.localScale.x > 0;
     }
 
     public void BuffInvulnerability() {

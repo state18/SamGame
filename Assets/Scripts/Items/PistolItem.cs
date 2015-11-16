@@ -11,6 +11,8 @@ public class PistolItem : Item
 	public GameObject bulletPrefab;	
 	private Animator playerAnim;
 	private Player player;
+    // private CharacterController2D playerController;
+    public Projectile projectile;
 
 	private int ongoingShots;
 	private float cooldown = 0f;
@@ -26,6 +28,7 @@ public class PistolItem : Item
 	void Start ()
 	{
         player = FindObjectOfType<Player>();
+        // playerController = player.GetComponent<CharacterController2D>();
         playerAnim = player.GetComponent<Animator>();
         
 	}
@@ -53,7 +56,10 @@ public class PistolItem : Item
 	{
 
 		Debug.Log ("Bullet Fired");
-		Instantiate (bulletPrefab, firePoint.position, firePoint.rotation);
+		var newBullet = (SimpleProjectile)Instantiate (projectile, firePoint.position, firePoint.rotation);
+        var direction = player.IsFacingRight ? Vector2.right : -Vector2.right;
+        //var initialVelocity = playerController.Velocity;
+        newBullet.Initialize(player.gameObject, direction);
 		cooldown = cooldownTime;
 		playerAnim.SetBool ("isShooting", true);
 		ongoingShots++;
