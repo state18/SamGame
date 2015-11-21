@@ -9,7 +9,7 @@ public class FlyingBot : MonoBehaviour
 {
 	//Patrol editable fields
 
-	public MovingPath patrolPath;       //Where will this entity patrol?
+	public PathDefinition patrolPath;       //Where will this entity patrol?
 	public int startingPoint;           //From which node will the entity begin patrolling?
 	public float targetedVelocity;		//How fast does the entity move by default?
 	public float detectionRadius;		//How far away can the entity see the player?

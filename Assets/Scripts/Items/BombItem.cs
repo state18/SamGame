@@ -8,7 +8,6 @@ public class BombItem : Item
 	//private float cooldown = 0f;
 	public float timeUntilDetonation;
 	private int ongoingBombs;         //no more than 2 at a time
-	Player player;
 	
 	public BombItem ()
 	{
@@ -19,7 +18,7 @@ public class BombItem : Item
 	// Use this for initialization
 	void Start ()
 	{
-        player = FindObjectOfType<Player>();
+
 	}
 	
 	// Update is called once per frame

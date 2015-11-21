@@ -11,7 +11,7 @@ public class PlatformBasic : MonoBehaviour
 	public float maxDistanceToGoal = .1f;
 	public int startingPoint;
 
-	public MovingPath path;
+	public PathDefinition path;
 
 
 	private IEnumerator<Transform> currentPoint;

@@ -10,8 +10,6 @@ public class Player : MonoBehaviour, ITakeDamage {
     
     private CharacterController2D _controller;
     private Animator _animator;
-    private BuffManager buffManager;
-    private ItemManager itemManager;
     private SpriteRenderer playerSprite;
     private float _normalizedHorizontalSpeed;
     private float _normalizedVerticalSpeed;
@@ -63,8 +61,6 @@ public class Player : MonoBehaviour, ITakeDamage {
     public void Awake() {
         _controller = GetComponent<CharacterController2D>();
         _animator = GetComponent<Animator>();
-        buffManager = GetComponent<BuffManager>();
-        itemManager = FindObjectOfType<ItemManager>();
         playerSprite = GetComponent<SpriteRenderer>();
         //TODO maybe find a better way to handle audio source organization.
         ouchEffect = GetComponent<AudioSource>();
