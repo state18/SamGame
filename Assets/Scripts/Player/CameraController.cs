@@ -27,12 +27,6 @@ public class CameraController : MonoBehaviour  //This script controls the camera
         IsFollowing = true;
     }
 
-    public void Awake() {
-        //Camera.main.orthographicSize = Screen.height / (2f * 16);
-    }
-    public void FixedUpdate() {
-
-    }
     public void LateUpdate() {
         var x = transform.position.x;               //controls the position of the camera (x and y)
         var y = transform.position.y;

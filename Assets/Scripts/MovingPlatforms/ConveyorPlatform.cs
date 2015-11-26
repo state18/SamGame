@@ -6,20 +6,8 @@ public class ConveyorPlatform : MonoBehaviour
 
 	public float speed;
 
-	// Use this for initialization
-	void Start ()
-	{
-	
-	}
-	
-	// Update is called once per frame
-	void Update ()
-	{
-	
-	}
+	public void ControllerStay2D(CharacterController2D controller) {
 
-	public float GetVelocity ()
-	{
-		return speed;
-	}
+        controller.AddForce(new Vector2(speed, 0));
+    }
 }

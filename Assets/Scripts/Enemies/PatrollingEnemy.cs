@@ -57,5 +57,5 @@ public class PatrollingEnemy : MonoBehaviour, ITakeDamage, IRespawnable {
         Health = MaxHealth;
     }
 
-    // TODO Handle player death/respawning this enemy
+    
 }

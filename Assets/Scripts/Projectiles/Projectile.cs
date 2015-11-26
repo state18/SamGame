@@ -14,7 +14,7 @@ public abstract class Projectile : MonoBehaviour {
     // TODO go back and watch tutorial. May have missed something as this method is never called!
     // Used to have initialVelocity parameter. 
     public void Initialize(GameObject owner, Vector2 direction) {
-        transform.right = direction;
+        //transform.right = direction;
         Owner = owner;
         Direction = direction;
         //InitialVelocity = initialVelocity;

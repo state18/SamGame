@@ -21,6 +21,8 @@ public class Player : MonoBehaviour, ITakeDamage {
     public float SpeedAccelerationOnGround = 10f;
     public float SpeedAccelerationInAir = 5f;
     public bool IsFacingRight { get; private set; }
+    // Is the user trying to move the character?
+    public bool IsKeyboardInput { get; set; }
     public int MaxHealth = 3;
     public AudioSource ouchEffect;          // On damage effect
     public Projectile Projectile;            // TODO merge this with current projectile system.
@@ -65,7 +67,6 @@ public class Player : MonoBehaviour, ITakeDamage {
         //TODO maybe find a better way to handle audio source organization.
         ouchEffect = GetComponent<AudioSource>();
         IsFacingRight = transform.localScale.x > 0;
-
         FullHealth();
     }
 
@@ -87,7 +88,10 @@ public class Player : MonoBehaviour, ITakeDamage {
 
         HandleAnimation();
     }
-    // TODO add death animation?
+
+    /// <summary>
+    /// Kills the player.
+    /// </summary>
     public void Kill() {
         _controller.HandleCollisions = false;
         GetComponent<Collider2D>().enabled = false;
@@ -97,6 +101,10 @@ public class Player : MonoBehaviour, ITakeDamage {
         GetComponent<SpriteRenderer>().enabled = false;
     }
 
+    /// <summary>
+    /// Respawns the player at a certain position in the world.
+    /// </summary>
+    /// <param name="spawnPoint">Where should the player respawn?</param>
     public void RespawnAt(Transform spawnPoint) {
         if (!IsFacingRight)
             Flip();
@@ -148,6 +156,8 @@ public class Player : MonoBehaviour, ITakeDamage {
         _normalizedHorizontalSpeed = Input.GetAxisRaw("Horizontal");
         _normalizedVerticalSpeed = Input.GetAxisRaw("Vertical");
 
+        IsKeyboardInput = _normalizedHorizontalSpeed == 0 ? false : true;
+
         if (_normalizedHorizontalSpeed == 1) {
             if (!IsFacingRight)
                 Flip();
@@ -161,12 +171,11 @@ public class Player : MonoBehaviour, ITakeDamage {
 
         if (Input.GetButtonDown("Respawn"))
             LevelManagerProto.Instance.KillPlayer();
-
     }
 
     private void HandleAnimation() {
 
-        _animator.SetFloat("playerSpeed", _controller.Velocity.magnitude > .5f ? 1 : 0);
+        _animator.SetFloat("playerSpeed",  Math.Abs(_controller.Velocity.x) >.5f && IsKeyboardInput ? 1 : 0);
 
         // If climbing and moving, the animation speed should be normal or "1". If not moving, then the speed should be 0.
         if (IsClimbing)

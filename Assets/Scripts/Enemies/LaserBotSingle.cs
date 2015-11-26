@@ -18,7 +18,7 @@ public class LaserBotSingle : MonoBehaviour
 	AudioSource fireSound;
 
 	public Transform firePoint;
-	public GameObject laserPrefab;
+	public Projectile laserPrefab;
 
 	// Use this for initialization
 	void Start ()
@@ -73,7 +73,8 @@ public class LaserBotSingle : MonoBehaviour
 	void Shoot ()
 	{
 
-		Instantiate (laserPrefab, firePoint.position, transform.rotation);
+		var newLaser = (SimpleProjectile)Instantiate (laserPrefab, firePoint.position, transform.rotation);
+        newLaser.Initialize(gameObject, transform.up);
 		fireSound.Play ();
 		shotDelayCounter = shotDelay;
 	}

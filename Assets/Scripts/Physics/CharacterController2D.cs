@@ -76,27 +76,43 @@ public class CharacterController2D : MonoBehaviour {
         _verticalDistanceBetweenRays = colliderHeight / (TotalHorizontalRays - 1);
     }
 
+    /// <summary>
+    /// Adds a Vector2 to the entity's velocity.
+    /// </summary>
+    /// <param name="force"> How much force to add?</param>
     public void AddForce(Vector2 force) {
         _velocity += force;
     }
 
+    /// <summary>
+    /// Sets the entity's velocity equal to a Vector2.
+    /// </summary>
+    /// <param name="force"> The new velocity</param>
     public void SetForce(Vector2 force) {
         _velocity = force;
     }
 
-    // A bit redundant, but allows us to only set one component of our velocity
+    /// <summary>
+    /// The x component of the entity's velocity is set to a value.
+    /// </summary>
+    /// <param name="x"> The new x component value</param>
     public void SetHorizontalForce(float x) {
         _velocity.x = x;
     }
 
+    /// <summary>
+    /// The y component of the entity's velocity is set to a value.
+    /// </summary>
+    /// <param name="y"> The new y component value</param>
     public void SetVerticalForce(float y) {
         _velocity.y = y;
     }
 
+    /// <summary>
+    /// The entity's vertical velocity is set to its jump magnitude.
+    /// </summary>
     public void Jump() {
-        // Note: Vertical force is set to 0 before applying jumpforce because it fixes a bug with jumping one frame too early
-        SetVerticalForce(0);
-        AddForce(new Vector2(0, Parameters.JumpMagnitude));
+        SetVerticalForce(Parameters.JumpMagnitude);
         _jumpIn = Parameters.JumpFrequency;
     }
 
@@ -149,6 +165,7 @@ public class CharacterController2D : MonoBehaviour {
 
                 StandingOn.SendMessage("ControllerEnter2D", this, SendMessageOptions.DontRequireReceiver);
                 _lastStandingOn = StandingOn;
+                // StandingOn did not change but isn't null.
             } else if (StandingOn != null)
                 StandingOn.SendMessage("ControllerStay2D", this, SendMessageOptions.DontRequireReceiver);
         } else if (_lastStandingOn != null) {
