@@ -28,6 +28,14 @@ public class CoroutineBridge : MonoBehaviour
 
 	public void myStopCoroutine (Coroutine routine)
 	{
-		StopCoroutine (routine);
+        StopCoroutine (routine);
+        //StopAllCoroutines();          //working code
 	}
+
+    public IEnumerator Wait(float duration) {
+        for (float i = 0; i < duration; i += Time.deltaTime) {
+
+            yield return null;
+        }
+    }
 }

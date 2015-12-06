@@ -52,8 +52,10 @@ public class BlinkPlatformSystem : MonoBehaviour
 		}
 
 		bool playerInRange = Physics2D.OverlapCircle (soundPosition, soundRadius, isPlayer);
-		if (playerInRange)
-			blinkSound.Play ();
+        if (playerInRange) {
+            Debug.Log("Playing blink sound.");
+            blinkSound.Play();
+        }
 		//Debug.Log ("finished cycle");
 	}
 

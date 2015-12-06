@@ -82,7 +82,7 @@ public class Player : MonoBehaviour, ITakeDamage {
         if (IsDead)
             _controller.SetHorizontalForce(0);
         else if (IsClimbing)
-            _controller.SetForce(new Vector2(_normalizedHorizontalSpeed * MaxSpeed * 20 * Time.deltaTime, _normalizedVerticalSpeed * MaxSpeed * 20 * Time.deltaTime));
+            _controller.SetForce(new Vector2(_normalizedHorizontalSpeed * MaxSpeed / 2.5f, _normalizedVerticalSpeed * MaxSpeed / 2.5f));
         else
             _controller.SetHorizontalForce(Mathf.Lerp(_controller.Velocity.x, _normalizedHorizontalSpeed * MaxSpeed, Time.deltaTime * movementFactor));
 

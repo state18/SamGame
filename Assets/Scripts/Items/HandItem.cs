@@ -86,27 +86,32 @@ public class HandItem : Item {
 
         foreach (RaycastHit2D j in hit) {
             var collider = j.collider;
+
             if (collider != null) {
 
+                // Attempt to handle the case where it hits an entity that can take damage.
                 var takeDamage = (ITakeDamage)collider.GetComponent(typeof(ITakeDamage));
+
                 if (takeDamage != null)
                     takeDamage.TakeDamage(damageToGive, gameObject);
-
-            } else if (j.collider != null && j.collider.tag == "Lever") {
-                var leverControl = j.collider.GetComponent<LeverBehavior>();
-                if (!leverControl.isOn) {
-                    leverControl.TellDoorOpen();
-                } else if (leverControl.isOn)
-                    leverControl.TellDoorClose();
+                // Attempt to handle the case where a lever is hit.
+                else if (collider.GetComponent<LeverBehavior>() != null) {
+                    var leverControl = j.collider.GetComponent<LeverBehavior>();
+                    // TODO What was I thinking here? Encapsulate this within the class itself in the form of a toggle method!!!!
+                    if (!leverControl.isOn)
+                        leverControl.TellDoorOpen();
+                    else if (leverControl.isOn)
+                        leverControl.TellDoorClose();
+                }
             }
+
         }
-
-
         yield return new WaitForSeconds(.18f);
 
         ongoingPunches--;
         if (ongoingPunches <= 0)
             playerAnim.SetBool("isPunching", false);
+
 
     }
 }

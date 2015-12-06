@@ -3,14 +3,14 @@ using System.Collections;
 
 public class ScreenFader : MonoBehaviour
 {
-
+    public static ScreenFader instance;
 	Animator anim;
 	bool isFading = false;
 
 	// Use this for initialization
 	void Start ()
 	{
-
+        instance = this;
 		anim = GetComponent<Animator> ();
 	
 	}

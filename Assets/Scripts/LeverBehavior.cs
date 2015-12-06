@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+// TODO rework the on/ off methods into a single toggle method.
 public class LeverBehavior : MonoBehaviour
 {
 	public DoorController door;
@@ -60,7 +61,7 @@ public class LeverBehavior : MonoBehaviour
 
 	void OnTriggerEnter2D (Collider2D other)
 	{
-		if (other.tag == "PlayerTrigger") {
+		if (other.tag == "Player") {
 			playerInside = true;
 		} else if (other.tag == "Projectile" && !isOn) {
 			TellDoorOpen ();
@@ -71,7 +72,7 @@ public class LeverBehavior : MonoBehaviour
 
 	void OnTriggerExit2D (Collider2D other)
 	{
-		if (other.tag == "PlayerTrigger") {
+		if (other.tag == "Player") {
 			playerInside = false;
 		} 
 	}

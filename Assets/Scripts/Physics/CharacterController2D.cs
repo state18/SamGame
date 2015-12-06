@@ -119,6 +119,8 @@ public class CharacterController2D : MonoBehaviour {
     public void LateUpdate() {
         _jumpIn -= Time.deltaTime;
         _velocity.y += Parameters.Gravity * Time.deltaTime;
+
+        // This line of code is why platforms must account for changing frames on their own. They are checked below.
         Move(Velocity * Time.deltaTime);
     }
 
@@ -155,6 +157,7 @@ public class CharacterController2D : MonoBehaviour {
         if (State.IsMovingUpSlope)
             _velocity.y = 0;
 
+        // Important: Platforms utilizing the ControllerStay2D method must account for the time between frames. (Example: conveyer belt speed * Time.deltaTime)  
         if (StandingOn != null) {
             _activeGlobalPlatformPoint = transform.position;
             _activeLocalPlatformPoint = StandingOn.transform.InverseTransformPoint(transform.position);

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[System.Obsolete("Use GiveDamageToPlayer")]
+[System.Obsolete("Use GiveDamageToPlayer", true)]
 public class HurtPlayerOnContact : MonoBehaviour   //any entity with this will hurt the player on contact
 {
     public int damageToGive;                        //how much damage to deal?

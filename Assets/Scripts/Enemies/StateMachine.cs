@@ -23,6 +23,7 @@ public class StateMachine  // does not inherit from Monobehavior
 		Func<IEnumerator> poppedState = states.Pop ();
 
 		if (getCurrentState () != null) {
+            Debug.Log("This should never run");
 			runningCoroutine = CoroutineBridge.instance.myStartCoroutine (getCurrentState () ());
 		}
 		return poppedState;
@@ -33,6 +34,7 @@ public class StateMachine  // does not inherit from Monobehavior
 		if (getCurrentState () != state) {
 
 			if (getCurrentState () != null) {
+                Debug.Log("this should also never run yet.");
 				CoroutineBridge.instance.myStopCoroutine (runningCoroutine);  
 			}
 

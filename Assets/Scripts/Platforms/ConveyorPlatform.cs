@@ -8,6 +8,6 @@ public class ConveyorPlatform : MonoBehaviour
 
 	public void ControllerStay2D(CharacterController2D controller) {
 
-        controller.AddForce(new Vector2(speed, 0));
+        controller.AddForce(new Vector2(speed * Time.deltaTime, 0));
     }
 }

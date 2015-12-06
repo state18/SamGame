@@ -33,9 +33,9 @@ public class ActiveBomb : MonoBehaviour
                 if (takeDamage != null)
                     takeDamage.TakeDamage(damage, gameObject);
                 else{
-                    var destructable = n.GetComponent<Destructable>();
+                    var destructable = n.GetComponent<Bombable>();
                     if (destructable != null)
-                        destructable.DestroyMe();
+                        destructable.OnBombed();
                 }
 				// TODO Handle scenario for destructables and possibly lever toggling!
 			}
