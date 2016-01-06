@@ -48,7 +48,7 @@ class PlayerBounds : MonoBehaviour {
 
     private void ApplyBoundsBehavior(BoundsBehavior behavior, Vector2 constrainedPosition) {
         if (behavior == BoundsBehavior.Kill) {
-            LevelManagerProto.Instance.KillPlayer();
+            LevelManager.Instance.KillPlayer();
             return;
         }
 

@@ -135,7 +135,7 @@ public class CharacterController2D : MonoBehaviour {
             if (deltaMovement.y < 0 && wasGrounded)
                 HandleVerticalSlope(ref deltaMovement);
 
-            if (Mathf.Abs(deltaMovement.x) > .001f)
+            if (Mathf.Abs(deltaMovement.x) > 0f) // was .001f before the collision fix
                 MoveHorizontally(ref deltaMovement);
 
             MoveVertically(ref deltaMovement);
@@ -260,7 +260,7 @@ public class CharacterController2D : MonoBehaviour {
                 State.IsCollidingLeft = true;
             }
 
-            if (rayDistance < SkinWidth + .0001f)
+            if (rayDistance < SkinWidth + .0001f) 
                 break;
         }
     }
@@ -302,10 +302,10 @@ public class CharacterController2D : MonoBehaviour {
                 State.IsCollidingBelow = true;
             }
 
-            if (!isGoingUp && deltaMovement.y > .0001f)
+            if (!isGoingUp && deltaMovement.y > .0001f) 
                 State.IsMovingUpSlope = true;
 
-            if (rayDistance < SkinWidth + .0001f)
+            if (rayDistance < SkinWidth + .0001f)  
                 break;
         }
     }

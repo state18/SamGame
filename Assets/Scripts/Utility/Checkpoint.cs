@@ -22,8 +22,8 @@ public class Checkpoint : MonoBehaviour
 	{
 
 		if (other.GetComponent<Player>() != null && !isActivated) {
-            LevelManagerProto.Instance.currentCheckPoint = this;
-            LevelManagerProto.Instance.ClearDeadEnemies();
+            LevelManager.Instance.currentCheckPoint = this;
+            LevelManager.Instance.ClearDeadEnemies();
 			isActivated = true;
 			anim.SetBool ("isActivated", true);
 			GetComponent<AudioSource> ().Play ();

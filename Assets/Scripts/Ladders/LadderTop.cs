@@ -6,12 +6,12 @@ public class LadderTop : MonoBehaviour {
     // Maybe have a very brief window of time where an animation plays and prevents the player from moving.
     Player player;
 
-    Animator anim;
+    //Animator anim;
 
     // Use this for initialization
     void Start() {
         player = FindObjectOfType<Player>();
-        anim = player.GetComponent<Animator>();
+        //anim = player.GetComponent<Animator>();
     }
 
     // Update is called once per frame

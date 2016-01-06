@@ -3,10 +3,8 @@ using UnityEngine;
 
 public class PatrollingEnemy : MonoBehaviour, ITakeDamage, IRespawnable {
     public float Speed;
-    public float FireRate = 1;
-    public Projectile Projectile;
+    //public Projectile Projectile;
     public GameObject DestroyedEffect;
-    public int PointsToGivePlayer;
     public float MaxHealth;
     public float Health { get; private set; }
     public bool IsDead { get; private set; }
@@ -23,7 +21,7 @@ public class PatrollingEnemy : MonoBehaviour, ITakeDamage, IRespawnable {
 
     public void Start() {
         controller = GetComponent<CharacterController2D>();
-        direction = new Vector2(-1, 0);
+        direction = Vector2.left;
         startPosition = transform.position;
         Health = MaxHealth;
     }
@@ -52,7 +50,6 @@ public class PatrollingEnemy : MonoBehaviour, ITakeDamage, IRespawnable {
         }
     }
     public void TakeDamage(int damage, GameObject instigator) {
-        // Possibly add points here, if killed by the player, possibly through a separate score manager
         Health -= damage;
         if (Health <= 0) 
             KillMe();
@@ -63,7 +60,7 @@ public class PatrollingEnemy : MonoBehaviour, ITakeDamage, IRespawnable {
         if (DestroyedEffect != null)
             Instantiate(DestroyedEffect, transform.position, transform.rotation);
 
-        LevelManagerProto.Instance.AddDeadEnemy(gameObject);
+        LevelManager.Instance.AddDeadEnemy(gameObject);
         gameObject.SetActive(false);
     }
 

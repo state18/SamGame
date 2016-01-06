@@ -42,7 +42,7 @@ public class EnemyHealthManager : MonoBehaviour, ITakeDamage, IRespawnable {
         if (DestroyedEffect != null)
             Instantiate(DestroyedEffect, transform.position, transform.rotation);
 
-        LevelManagerProto.Instance.AddDeadEnemy(gameObject);
+        LevelManager.Instance.AddDeadEnemy(gameObject);
         gameObject.SetActive(false);
     }
 }

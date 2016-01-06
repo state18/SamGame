@@ -7,6 +7,7 @@ public class HurtPlayerOnContact : MonoBehaviour   //any entity with this will h
     public int damageToGive;                        //how much damage to deal?
     private Player player;
 	public bool knockback;
+    public bool instaKill;
 
 	// Use this for initialization
 	void Start ()
@@ -17,8 +18,12 @@ public class HurtPlayerOnContact : MonoBehaviour   //any entity with this will h
     void OnTriggerEnter2D (Collider2D other)				//on contact with the player, they are damaged
 	{
 
-		if (other.tag == "Player") {
-            player.TakeDamage(damageToGive, gameObject);
-		}
+        if (other.tag == "Player") {
+            if (instaKill)
+                LevelManager.Instance.KillPlayer();
+            else
+                player.TakeDamage(damageToGive, gameObject);
+        }
+		
 	}
 }

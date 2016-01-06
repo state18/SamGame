@@ -7,14 +7,12 @@ public class ActiveBomb : MonoBehaviour
 	float lifetime = 3f;
 	public float blastRadius;
 	Animator bombAnimator;
-	Rigidbody2D rb;
 	public GameObject detonationParticle;
 	
 	// Use this for initialization
 	void Start ()
 	{
 		bombAnimator = GetComponent<Animator> ();
-		rb = GetComponent<Rigidbody2D> ();
 	}
 	
 	// Update is called once per frame
@@ -33,9 +31,9 @@ public class ActiveBomb : MonoBehaviour
                 if (takeDamage != null)
                     takeDamage.TakeDamage(damage, gameObject);
                 else{
-                    var destructable = n.GetComponent<Bombable>();
+                    var destructable = n.GetComponent<Destructable>();
                     if (destructable != null)
-                        destructable.OnBombed();
+                        destructable.Destroy();
                 }
 				// TODO Handle scenario for destructables and possibly lever toggling!
 			}
@@ -47,9 +45,4 @@ public class ActiveBomb : MonoBehaviour
 		}
 	}
 
-	void FixedUpdate ()
-	{
-		rb.velocity = new Vector2 (0f, rb.velocity.y);
-
-	}
 }

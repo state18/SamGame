@@ -7,7 +7,7 @@ using System;
 /// The Player class handles actions specific to the player. A lot of these actions interact with the CharacterController2D class.
 /// </summary>
 public class Player : MonoBehaviour, ITakeDamage {
-    
+
     private CharacterController2D _controller;
     private Animator _animator;
     private SpriteRenderer playerSprite;
@@ -42,11 +42,14 @@ public class Player : MonoBehaviour, ITakeDamage {
     public bool CanClimb { get; set; }
     private bool isClimbing;
 
-    public bool IsClimbing {
-        get {
+    public bool IsClimbing
+    {
+        get
+        {
             return isClimbing;
         }
-        set {
+        set
+        {
             if (value)
                 _controller.OverrideParameters = climbingParameters;
             else {
@@ -84,8 +87,8 @@ public class Player : MonoBehaviour, ITakeDamage {
         else if (IsClimbing)
             _controller.SetForce(new Vector2(_normalizedHorizontalSpeed * MaxSpeed / 2.5f, _normalizedVerticalSpeed * MaxSpeed / 2.5f));
         else
-            _controller.SetHorizontalForce(Mathf.Lerp(_controller.Velocity.x, _normalizedHorizontalSpeed * MaxSpeed, Time.deltaTime * movementFactor));
-
+            _controller.SetHorizontalForce(Mathf.Lerp(_controller.Velocity.x, _normalizedHorizontalSpeed * MaxSpeed, movementFactor * Time.deltaTime));
+        // IMPORTANT NOTE: 1/3/2016 had to fix issues with vsync. Removed multiplying movementFactor by Time.deltaTime and used smaller values for the acceleration on ground/air.
         HandleAnimation();
     }
 
@@ -93,11 +96,15 @@ public class Player : MonoBehaviour, ITakeDamage {
     /// Kills the player.
     /// </summary>
     public void Kill() {
+        CancelInvoke("SpriteToggle");
         _controller.HandleCollisions = false;
         GetComponent<Collider2D>().enabled = false;
         IsDead = true;
         Health = 0;
 
+        for (int i = 0; i < hearts.Length; i++) {
+            hearts[i].isOn = false;
+        }
         GetComponent<SpriteRenderer>().enabled = false;
     }
 
@@ -112,7 +119,7 @@ public class Player : MonoBehaviour, ITakeDamage {
         IsDead = false;
         GetComponent<Collider2D>().enabled = true;
         _controller.HandleCollisions = true;
-        GetComponent<SpriteRenderer>().enabled = true;
+        playerSprite.enabled = true;
         FullHealth();
 
         transform.position = spawnPoint.position;
@@ -135,7 +142,7 @@ public class Player : MonoBehaviour, ITakeDamage {
             Health -= damage;
 
             if (Health <= 0)
-                LevelManagerProto.Instance.KillPlayer();
+                LevelManager.Instance.KillPlayer();
             else
                 BuffInvulnerability();
 
@@ -147,8 +154,8 @@ public class Player : MonoBehaviour, ITakeDamage {
 
     public void FullHealth() {
         Health = MaxHealth;
-        foreach (Toggle t in hearts) {
-            t.isOn = true;
+        for (int i = 0; i < hearts.Length; i++) {
+            hearts[i].isOn = true;
         }
     }
     // TODO Refactor to use GetAxisRaw
@@ -170,12 +177,12 @@ public class Player : MonoBehaviour, ITakeDamage {
         }
 
         if (Input.GetButtonDown("Respawn"))
-            LevelManagerProto.Instance.KillPlayer();
+            LevelManager.Instance.KillPlayer();
     }
 
     private void HandleAnimation() {
 
-        _animator.SetFloat("playerSpeed",  Math.Abs(_controller.Velocity.x) >.5f && IsKeyboardInput ? 1 : 0);
+        _animator.SetFloat("playerSpeed", IsKeyboardInput ? 1 : 0);     //previously also had the condition of _velocity.x > .5f. I do not believe this was needed.
 
         // If climbing and moving, the animation speed should be normal or "1". If not moving, then the speed should be 0.
         if (IsClimbing)
@@ -210,10 +217,14 @@ public class Player : MonoBehaviour, ITakeDamage {
     }
 
     public void BuffInvulnerability() {
-        StartCoroutine("BuffInvulnerabilityCo");        //calls coroutine below (because there is a yield statement)
+        StartCoroutine("BuffInvulnerabilityCo");
     }
 
-    IEnumerator BuffInvulnerabilityCo()             //Player cannot be damaged while this is active. Sprite will toggle on/off as an indicator
+    /// <summary>
+    /// The player is invulnerable and the sprite will flicker for the duration
+    /// </summary>
+    /// <returns>WaitForSeconds or nothing</returns>
+    private IEnumerator BuffInvulnerabilityCo()             //Player cannot be damaged while this is active. Sprite will toggle on/off as an indicator
     {
         IsInvulnerable = true;
         InvokeRepeating("SpriteToggle", 0f, .1f);
@@ -226,12 +237,12 @@ public class Player : MonoBehaviour, ITakeDamage {
 
     }
 
-    public void SpriteToggle()                          //Flickers the player sprite on/off each time it is called
-    {
-        if (IsInvulnerable) {
-            playerSprite = GetComponent<SpriteRenderer>();
-
+    /// <summary>
+    /// The SpriteRenderer component is toggled on or off
+    /// </summary>
+    private void SpriteToggle() {
+        if (IsInvulnerable)
             playerSprite.enabled = !playerSprite.enabled;
-        }
+
     }
 }

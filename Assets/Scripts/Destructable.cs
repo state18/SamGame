@@ -1,7 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Bombable : MonoBehaviour {
+/// <summary>
+/// Any GameObject with this component can be destroyed if needed.
+/// Example: A bomb destroying a cracked wall
+/// </summary>
+public class Destructable : MonoBehaviour {
 
     public GameObject Debris;
 
@@ -14,8 +18,10 @@ public class Bombable : MonoBehaviour {
     void Update() {
 
     }
-
-    public void OnBombed() {
+    /// <summary>
+    /// Destroys this GameObject and executes protocol for its destruction.
+    /// </summary>
+    public void Destroy() {
         if (Debris != null)
             Instantiate(Debris, transform.position + new Vector3(0f, .5f, 0f), transform.rotation);
         Destroy(gameObject);

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class HandItem : Item {
+public class Sword : Item {
 
     public Transform handStart;
     public Transform handFinish;
@@ -22,10 +22,6 @@ public class HandItem : Item {
 
     public LayerMask punchable;
 
-    public HandItem() {
-        InHand = false;
-        IsObtained = true;
-    }
     // Use this for initialization
     void Start() {
         playerAnim = handStart.GetComponentInParent<Animator>();
@@ -95,14 +91,9 @@ public class HandItem : Item {
                 if (takeDamage != null)
                     takeDamage.TakeDamage(damageToGive, gameObject);
                 // Attempt to handle the case where a lever is hit.
-                else if (collider.GetComponent<LeverBehavior>() != null) {
-                    var leverControl = j.collider.GetComponent<LeverBehavior>();
-                    // TODO What was I thinking here? Encapsulate this within the class itself in the form of a toggle method!!!!
-                    if (!leverControl.isOn)
-                        leverControl.TellDoorOpen();
-                    else if (leverControl.isOn)
-                        leverControl.TellDoorClose();
-                }
+                else if (collider.GetComponent<LeverBehavior>() != null)
+                    j.collider.GetComponent<LeverBehavior>().ToggleDoor();
+
             }
 
         }

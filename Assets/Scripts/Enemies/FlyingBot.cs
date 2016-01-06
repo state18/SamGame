@@ -47,7 +47,7 @@ public class FlyingBot : MonoBehaviour {
 
 
         if (patrolPath == null) {
-            Debug.LogError("Path cannot be null", gameObject);
+            //Debug.LogError("Path cannot be null", gameObject);
             return;
         }
 
@@ -65,7 +65,7 @@ public class FlyingBot : MonoBehaviour {
 
     public IEnumerator PatrolState()    //Move around a contained area
     {
-        Debug.Log("Patrolling");
+        //Debug.Log("Patrolling");
 
         #region Patrol Entry
         yield return null;
@@ -73,14 +73,14 @@ public class FlyingBot : MonoBehaviour {
 
         while (true) {
 
-            Debug.Log("Patrolling main loop.");
+            //Debug.Log("Patrolling main loop.");
             //Enemy moves towards the next point in its path. If at destination, cycle to the next point
             #region Patrol Action
 
             float maxDistanceToGoal = .1f;
 
             if (currentPoint == null || currentPoint.Current == null) {
-                Debug.Log("currentPoint is null");
+                //Debug.Log("currentPoint is null");
                 yield return null;
             }
             var distanceSquared = (transform.position - currentPoint.Current.position).sqrMagnitude;
@@ -95,7 +95,7 @@ public class FlyingBot : MonoBehaviour {
             //Transition Checks: MoveToPlayer
             #region To MoveToPlayer
             if (Physics2D.OverlapCircle(transform.position, detectionRadius, whatIsPlayer) && botBounds.Contains(playerTransform.position)) { //TODO CircleRaycast so it doesn't see player through walls, also  don't call this every frame, use coroutine
-                Debug.Log("From Patrol to MoveToPlayer");
+                //Debug.Log("From Patrol to MoveToPlayer");
                 brain.popState();
                 brain.pushState(MoveToPlayerState);
 
@@ -109,7 +109,7 @@ public class FlyingBot : MonoBehaviour {
 
     public IEnumerator MoveToPlayerState()  //Fly over the player while they are in range of the entity AND within the entity's max bounds
     {
-        Debug.Log("Moving To Player");
+        //Debug.Log("Moving To Player");
 
         #region MoveToPlayer Entry
         yield return null;
@@ -118,7 +118,7 @@ public class FlyingBot : MonoBehaviour {
         while (true) {
 
             #region MoveToPlayer Action
-            Debug.Log("MoveToPlayer main loop");
+            //Debug.Log("MoveToPlayer main loop");
             float maxDistanceToGoal = .3f;                                      // How close does the bot need to be to be considered at the destination?
             float step = playerController.Velocity.magnitude * 1.2f;            //the entity will move a little bit faster than the player is moving
 
@@ -134,7 +134,7 @@ public class FlyingBot : MonoBehaviour {
            
             #region To Patrol
                 if (!botBounds.Contains(playerTransform.position)) {
-                Debug.Log("movetoplayer to patrolling");
+                //Debug.Log("movetoplayer to patrolling");
                 //StopCoroutine("PreSlamDownwardsCoroutine");
                 //isPreSlamDownwardsRunning = false;
                 brain.popState();
@@ -149,10 +149,7 @@ public class FlyingBot : MonoBehaviour {
             var distanceSquared = (transform.position - actualDestination).sqrMagnitude;
 
             if (distanceSquared < maxDistanceToGoal * maxDistanceToGoal) {                    //entity has reached the targeted location 
-                Debug.Log("From MoveToPlayer to SlamDownwards");
-                //isPreSlamDownwardsRunning = true;
-                //StartCoroutine("PreSlamDownwardsCoroutine");                //begins a timer that switches to slam state when it expires, but only if player is still being followed!
-
+                //Debug.Log("From MoveToPlayer to SlamDownwards");
                 brain.popState();
                 brain.pushState(SlamDownwardsState);
 
@@ -184,12 +181,12 @@ public class FlyingBot : MonoBehaviour {
         //float distanceToSlam = hit.distance - distanceOffset;
         //Debug.Log("Distance to slam: " + distanceToSlam);
 
-        Debug.Log("Waiting to turn white again.");
+        //Debug.Log("Waiting to turn white again.");
 
         //yield return CoroutineBridge.instance.myStartCoroutine(CoroutineBridge.instance.Wait(delayUntilSlam));
         yield return new WaitForSeconds(delayUntilSlam);
 
-        Debug.Log("Changing back to white.");
+        //Debug.Log("Changing back to white.");
         botAnim.speed = 1;
         botSprite.color = Color.white;
 
@@ -204,7 +201,7 @@ public class FlyingBot : MonoBehaviour {
             
 
             if (hit.collider != null) {
-                Debug.Log("Moving towards hit object!");
+                //Debug.Log("Moving towards hit object!");
                 transform.position = Vector2.MoveTowards(transform.position, distanceWithOffset, step * Time.deltaTime);              
             }
 
@@ -215,7 +212,7 @@ public class FlyingBot : MonoBehaviour {
             #region ToPatrol
             
             if (distanceSquared < .01f) {
-                Debug.Log("Going back to Patrol state from Slam State.");
+                //Debug.Log("Going back to Patrol state from Slam State.");
                 // It is important we stop this as ending a parent coroutine does not end those nested inside of it.
 
                 yield return new WaitForSeconds(delayUntilSlam);

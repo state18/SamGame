@@ -3,6 +3,7 @@
 public class GiveDamageToPlayer : MonoBehaviour {
     public int DamageToGive = 10;
     public bool knockback;
+    public bool instaKill;
     private Vector2
         _lastPosition,
         _velocity;
@@ -15,9 +16,13 @@ public class GiveDamageToPlayer : MonoBehaviour {
 
     public void OnTriggerStay2D(Collider2D other) {
         var player = other.GetComponent<Player>();
-        if (player == null)
+        if (player == null || player.IsDead)
             return;
 
+        if (instaKill) {
+            LevelManager.Instance.KillPlayer();
+            return;
+        }
         var controller = player.GetComponent<CharacterController2D>();
         var totalVelocity = controller.Velocity + _velocity;
 

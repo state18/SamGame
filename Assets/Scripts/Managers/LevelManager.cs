@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-public class LevelManagerProto : MonoBehaviour {
-    public static LevelManagerProto Instance { get; private set; }
+public class LevelManager : MonoBehaviour {
+    public static LevelManager Instance { get; private set; }
 
     public Player Player { get; private set; }
     public CameraController Camera { get; private set; }
@@ -71,8 +71,7 @@ public class LevelManagerProto : MonoBehaviour {
 
         if (currentCheckPoint != null)
             currentCheckPoint.SpawnPlayer(Player);
-        // TODO currently a hack: Gives the camera time to catch up to spawn position
-        yield return new WaitForSeconds(.8f);
+
         yield return StartCoroutine(ScreenFader.instance.FadeToClear());
     }
 
