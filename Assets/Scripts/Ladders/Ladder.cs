@@ -4,11 +4,11 @@ using System.Collections;
 public class Ladder : MonoBehaviour {
     bool inside;
 
-    Player player;
+    Player cachedPlayer;
 
     // Use this for initialization
     void Start() {
-        player = FindObjectOfType<Player>();
+        cachedPlayer = FindObjectOfType<Player>();
     }
 
     // Update is called once per frame
@@ -16,19 +16,25 @@ public class Ladder : MonoBehaviour {
         if (inside) {
 
             if (Input.GetAxisRaw("Vertical") != 0)
-                player.IsClimbing = true;
+                cachedPlayer.IsClimbing = true;
         }
     }
 
     void OnTriggerEnter2D(Collider2D other) {
-        if (other.tag == "Player")
+        Player player = other.GetComponent<Player>();
+        if (player != null) {
             inside = true;
+            player.LadderColliderCount++;
+        }
     }
 
     void OnTriggerExit2D(Collider2D other) {
-        if (other.tag == "Player") {
+        Player player = other.GetComponent<Player>();
+        if (player != null) {
             inside = false;
-            player.IsClimbing = false;
+            player.LadderColliderCount--;
+            if (player.LadderColliderCount == 0)
+                player.IsClimbing = false;
         }
     }
 }

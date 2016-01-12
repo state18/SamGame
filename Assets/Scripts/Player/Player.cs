@@ -41,6 +41,8 @@ public class Player : MonoBehaviour, ITakeDamage {
     public ControllerParameters2D climbingParameters;
     public bool CanClimb { get; set; }
     private bool isClimbing;
+    // Tracks how many ladder colliders the player is inside of. This is necessary for adjacent ladders to function properly.
+    public int LadderColliderCount { get; set; }
 
     public bool IsClimbing
     {
@@ -86,8 +88,9 @@ public class Player : MonoBehaviour, ITakeDamage {
             _controller.SetHorizontalForce(0);
         else if (IsClimbing)
             _controller.SetForce(new Vector2(_normalizedHorizontalSpeed * MaxSpeed / 2.5f, _normalizedVerticalSpeed * MaxSpeed / 2.5f));
-        else
+        else 
             _controller.SetHorizontalForce(Mathf.Lerp(_controller.Velocity.x, _normalizedHorizontalSpeed * MaxSpeed, movementFactor * Time.deltaTime));
+            
         // IMPORTANT NOTE: 1/3/2016 had to fix issues with vsync. Removed multiplying movementFactor by Time.deltaTime and used smaller values for the acceleration on ground/air.
         HandleAnimation();
     }

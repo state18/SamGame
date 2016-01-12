@@ -15,6 +15,7 @@ public class CharacterController2D : MonoBehaviour {
     // What do we collide with?
     public LayerMask PlatformMask;
     public LayerMask MovingPlatformMask;
+    public LayerMask OneWayMask;
     public ControllerParameters2D DefaultParameters;
 
     public ControllerState2D State { get; private set; }
@@ -112,8 +113,10 @@ public class CharacterController2D : MonoBehaviour {
     /// The entity's vertical velocity is set to its jump magnitude.
     /// </summary>
     public void Jump() {
-        SetVerticalForce(Parameters.JumpMagnitude);
-        _jumpIn = Parameters.JumpFrequency;
+        if (_jumpIn <= 0) {
+            SetVerticalForce(Parameters.JumpMagnitude);
+            _jumpIn = Parameters.JumpFrequency;
+        }
     }
 
     public void LateUpdate() {
@@ -268,17 +271,18 @@ public class CharacterController2D : MonoBehaviour {
     private void MoveVertically(ref Vector2 deltaMovement) {
         var isGoingUp = deltaMovement.y > 0;
         var rayDistance = Mathf.Abs(deltaMovement.y) + SkinWidth;
-        var rayDirection = isGoingUp ? Vector2.up : -Vector2.up;
+        var rayDirection = isGoingUp ? Vector2.up : Vector2.down;
         var rayOrigin = isGoingUp ? _raycastTopLeft : _raycastBottomLeft;
+        // If not going up, consider one way platforms as well!
+        var maskToUse = isGoingUp ? PlatformMask.value : PlatformMask | OneWayMask;
 
         rayOrigin.x += deltaMovement.x;
-
         var standingOnDistance = float.MaxValue;
         for (var i = 0; i < TotalVerticalRays; i++) {
             var rayVector = new Vector2(rayOrigin.x + (i * _horizontalDistanceBetweenRays), rayOrigin.y);
             Debug.DrawRay(rayVector, rayDirection * rayDistance, Color.red);
 
-            var raycastHit = Physics2D.Raycast(rayVector, rayDirection, rayDistance, PlatformMask);
+            var raycastHit = Physics2D.Raycast(rayVector, rayDirection, rayDistance, maskToUse);
             if (!raycastHit)
                 continue;
 

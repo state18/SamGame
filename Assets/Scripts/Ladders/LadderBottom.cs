@@ -4,38 +4,44 @@ using System.Collections;
 public class LadderBottom : MonoBehaviour {
     bool inside;
 
-    Player player;
+    Player cachedPlayer;
 
     // Use this for initialization
     void Start() {
-        player = FindObjectOfType<Player>();
+        cachedPlayer = FindObjectOfType<Player>();
     }
 
     // Update is called once per frame
     void Update() {
         if (inside) {
 
-            if (Input.GetAxisRaw("Vertical") == -1) {
+            if (Input.GetAxisRaw("Vertical") == -1 && cachedPlayer.LadderColliderCount == 0) {
 
-                player.IsClimbing = false;
+                cachedPlayer.IsClimbing = false;
 
             } else if (Input.GetAxisRaw("Vertical") == 1) {
 
-                player.IsClimbing = true;
+                cachedPlayer.IsClimbing = true;
             }
 
         }
     }
 
     void OnTriggerEnter2D(Collider2D other) {
-        if (other.tag == "Player")
+        Player player = other.GetComponent<Player>();
+        if (player != null) {
             inside = true;
+            player.LadderColliderCount++;
+        }
     }
 
     void OnTriggerExit2D(Collider2D other) {
-        if (other.tag == "Player") {
+        Player player = other.GetComponent<Player>();
+        if (player != null) {
             inside = false;
-            player.IsClimbing = false;
+            player.LadderColliderCount--;
+            if (player.LadderColliderCount == 0)
+                player.IsClimbing = false;
         }
     }
 }

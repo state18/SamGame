@@ -34,7 +34,6 @@ public class CoroutineBridge : MonoBehaviour
 
     public IEnumerator Wait(float duration) {
         for (float i = 0; i < duration; i += Time.deltaTime) {
-
             yield return null;
         }
     }

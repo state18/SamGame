@@ -14,11 +14,6 @@ public class LadderTop : MonoBehaviour {
         //anim = player.GetComponent<Animator>();
     }
 
-    // Update is called once per frame
-    void Update() {
-
-    }
-
     void OnTriggerStay2D(Collider2D other) {
         if (other.tag == "Player") {
 
@@ -29,8 +24,6 @@ public class LadderTop : MonoBehaviour {
                 Vector3 desiredDestination = new Vector3(transform.position.x, transform.position.y - yOffset + .2f, transform.position.z);
 
                 other.transform.position = desiredDestination;
-
-                //player.CanClimb = true;
                 player.IsClimbing = true;
 
             } else if (player.IsClimbing && Input.GetAxisRaw("Vertical") == 1) {
@@ -38,7 +31,7 @@ public class LadderTop : MonoBehaviour {
                 // anim.SetTrigger("LadderExit");
                 var yOffset = other.GetComponent<BoxCollider2D>().size.y / 2;
                 // The amount we translate should be the difference between the destination point and the current center of the player's collider.
-                Vector3 desiredDestination = new Vector3(transform.position.x, transform.position.y + yOffset, transform.position.z);
+                Vector3 desiredDestination = new Vector3(transform.position.x, transform.position.y + yOffset - .2f, transform.position.z);
 
                 other.transform.position = desiredDestination;
 
