@@ -15,9 +15,12 @@ public abstract class Enemy : MonoBehaviour, ITakeDamage, IRespawnable {
 
     protected Vector2 startPosition;
     protected Vector2 direction;
-    
+    protected AudioSource onHitSound;
+
     public virtual void TakeDamage(int damage, GameObject instigator) {
         Health -= damage;
+        if (onHitSound != null)
+            onHitSound.Play();
         if (Health <= 0)
             KillMe();
     }

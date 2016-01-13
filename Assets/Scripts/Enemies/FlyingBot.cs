@@ -5,12 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 
 
-public class FlyingBot : MonoBehaviour {
+public class FlyingBot : Enemy {
     //Patrol editable fields
 
     public PathDefinition patrolPath;       //Where will this entity patrol?
     public int startingPoint;           //From which node will the entity begin patrolling?
-    public float targetedVelocity;      //How fast does the entity move by default?
     public float detectionRadius;       //How far away can the entity see the player?
     public LayerMask whatIsPlayer;
     public Rect botBounds;              //How far away can the entity follow the player?
@@ -89,7 +88,7 @@ public class FlyingBot : MonoBehaviour {
                 currentPoint.MoveNext();
 
             }
-            transform.position = Vector2.MoveTowards(transform.position, currentPoint.Current.position, Time.deltaTime * targetedVelocity);
+            transform.position = Vector2.MoveTowards(transform.position, currentPoint.Current.position, Time.deltaTime * Speed);
             #endregion
 
             //Transition Checks: MoveToPlayer
@@ -122,8 +121,8 @@ public class FlyingBot : MonoBehaviour {
             float maxDistanceToGoal = .3f;                                      // How close does the bot need to be to be considered at the destination?
             float step = playerController.Velocity.magnitude * 1.2f;            //the entity will move a little bit faster than the player is moving
 
-            if (step < targetedVelocity)                                               //If adjusted speed is slower than regular speed, move at regular speed.
-                step = targetedVelocity;
+            if (step < Speed)                                               //If adjusted speed is slower than regular speed, move at regular speed.
+                step = Speed;
 
             Vector3 actualDestination = new Vector3(0, yOffsetFromPlayer, 0) + playerTransform.position;        //the point where the entity wants to go
             transform.position = Vector2.MoveTowards(transform.position, actualDestination, step * Time.deltaTime);
@@ -195,7 +194,7 @@ public class FlyingBot : MonoBehaviour {
 
             #region SlamDownwards Action
             //TODO fill me up with slamming code.
-            float step = targetedVelocity * 1.5f;
+            float step = Speed * 1.5f;
             // Initialized at placeholder one.
             // TODO IMPORTANT RECENT WORK: Refer to the FollowPath script to see how to detect when an object using MoveTowards has reached its destination!!!!
             

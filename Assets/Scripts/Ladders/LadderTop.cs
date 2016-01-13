@@ -34,9 +34,6 @@ public class LadderTop : MonoBehaviour {
                 Vector3 desiredDestination = new Vector3(transform.position.x, transform.position.y + yOffset - .2f, transform.position.z);
 
                 other.transform.position = desiredDestination;
-
-
-                //player.CanClimb = false;
                 player.IsClimbing = false;
 
 
