@@ -45,7 +45,6 @@ public class ActiveBomb : MonoBehaviour {
                 if (leverInteraction != null)
                     leverInteraction.ToggleDoor();
 
-                // TODO Handle scenario for destructables and possibly lever toggling!
             }
             Destroy(gameObject);
         } else if (lifetime < 1) {

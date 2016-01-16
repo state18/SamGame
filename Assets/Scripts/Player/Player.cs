@@ -57,6 +57,7 @@ public class Player : MonoBehaviour, ITakeDamage {
             else {
                 _controller.OverrideParameters = null;
                 _animator.speed = 1;
+                _controller.SetVerticalForce(0f);
             }
             isClimbing = value;
             _animator.SetBool("isClimbing", IsClimbing);

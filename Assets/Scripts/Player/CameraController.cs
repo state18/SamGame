@@ -5,7 +5,7 @@ public class CameraController : MonoBehaviour  //This script controls the camera
 {
     public Transform Player;                    //reference to the player
 
-    public Transform backgroundLayerNotP;       //background to stay with camera
+    public Transform MoveWithCamera;       //background to stay with camera
 
     public Vector2                              //margin for player to walk in without camera movement
         Margin,
@@ -19,6 +19,8 @@ public class CameraController : MonoBehaviour  //This script controls the camera
 
     public bool IsFollowing { get; set; }                   //is the camera following the player?
 
+    public Vector2 DeltaMovement { get; private set; } //Stores the movement of the camera from the previous frame to the current one.
+
     public void Start()                     //bound values initialized
     {
         Player = FindObjectOfType<Player>().transform;
@@ -28,6 +30,9 @@ public class CameraController : MonoBehaviour  //This script controls the camera
     }
 
     public void LateUpdate() {
+
+        var lastPosition = transform.position;
+
         var x = transform.position.x;               //controls the position of the camera (x and y)
         var y = transform.position.y;
 
@@ -49,8 +54,10 @@ public class CameraController : MonoBehaviour  //This script controls the camera
 
         transform.position = new Vector3(x, y, transform.position.z);
 
-        if (backgroundLayerNotP != null) {
-            backgroundLayerNotP.position = new Vector3(transform.position.x, transform.position.y, backgroundLayerNotP.position.z);
+        DeltaMovement = new Vector2(transform.position.x - lastPosition.x, transform.position.y - lastPosition.y);
+
+        if (MoveWithCamera != null) {
+            MoveWithCamera.position = new Vector3(transform.position.x, transform.position.y, MoveWithCamera.position.z);
         }
         //keeps camera from leaving bounds by adding above values
     }

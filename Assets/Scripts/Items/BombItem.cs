@@ -24,9 +24,6 @@ public class BombItem : Item
 	// Update is called once per frame
 	void Update ()
 	{
-		//if (cooldown > 0)
-		//	cooldown -= Time.deltaTime;
-		// TODO handle climbing later.
 		if (InHand && Input.GetKeyDown (KeyCode.X)) {
 			Use ();
 		}

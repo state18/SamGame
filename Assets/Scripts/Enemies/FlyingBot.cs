@@ -193,12 +193,9 @@ public class FlyingBot : Enemy {
         while (true) {
 
             #region SlamDownwards Action
-            //TODO fill me up with slamming code.
-            float step = Speed * 1.5f;
-            // Initialized at placeholder one.
-            // TODO IMPORTANT RECENT WORK: Refer to the FollowPath script to see how to detect when an object using MoveTowards has reached its destination!!!!
-            
 
+            float step = Speed * 1.5f;
+            
             if (hit.collider != null) {
                 //Debug.Log("Moving towards hit object!");
                 transform.position = Vector2.MoveTowards(transform.position, distanceWithOffset, step * Time.deltaTime);              

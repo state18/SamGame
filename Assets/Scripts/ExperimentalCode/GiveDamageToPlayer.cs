@@ -28,7 +28,6 @@ public class GiveDamageToPlayer : MonoBehaviour {
 
         // Handles knockback. The direction and magnitude of the knockback is determined by the velocity of the damage giver,
         // the velocity of the player, and is then multiplied by a scale to determine magnitude.
-        // TODO maybe not even use this and stick with my current setup for knockbacks!
         if (knockback && !player.IsInvulnerable) {
             controller.SetForce(new Vector2(
                 -1 * Mathf.Sign(totalVelocity.x) * Mathf.Clamp(Mathf.Abs(totalVelocity.x) * 5, 8, 20),

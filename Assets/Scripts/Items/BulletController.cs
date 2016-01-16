@@ -41,9 +41,6 @@ public class BulletController : MonoBehaviour
 
 	void OnTriggerEnter2D (Collider2D other)
 	{
-		//TODO if(other.tag == "Enemy"){
-		//	Instantiate (enemyDeathEffect, other.transform.position, other.transform.rotation);
-		//}
         
         // TODO Handle damaging enemies and interacting with other terrain. (same way as the sword and bomb most likely)
 
