@@ -15,7 +15,7 @@ public class Ladder : MonoBehaviour {
     void Update() {
         if (inside) {
 
-            if (Input.GetAxisRaw("Vertical") != 0)
+            if (Input.GetAxisRaw("Vertical") == 1)
                 cachedPlayer.IsClimbing = true;
         }
     }

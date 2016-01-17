@@ -125,9 +125,4 @@ public class ItemManager : MonoBehaviour {
             itemsObtained++;
         }
     }
-
-
-
-
-
 }

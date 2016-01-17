@@ -52,19 +52,21 @@ public class Player : MonoBehaviour, ITakeDamage {
         }
         set
         {
-            if (value)
-                _controller.OverrideParameters = climbingParameters;
-            else {
-                _controller.OverrideParameters = null;
-                _animator.speed = 1;
-                _controller.SetVerticalForce(0f);
+            if (value != isClimbing) {
+
+                if (value)
+                    _controller.OverrideParameters = climbingParameters;
+                else {
+                    _controller.OverrideParameters = null;
+                    _animator.speed = 1;
+                    _controller.SetVerticalForce(0f);
+                }
+
+                isClimbing = value;
+                _animator.SetBool("isClimbing", IsClimbing);
             }
-            isClimbing = value;
-            _animator.SetBool("isClimbing", IsClimbing);
         }
     }
-    // How long until the player can shoot next projectile?
-    //private float _canFireIn;
 
     public void Awake() {
         _controller = GetComponent<CharacterController2D>();
@@ -89,9 +91,9 @@ public class Player : MonoBehaviour, ITakeDamage {
             _controller.SetHorizontalForce(0);
         else if (IsClimbing)
             _controller.SetForce(new Vector2(_normalizedHorizontalSpeed * MaxSpeed / 2.5f, _normalizedVerticalSpeed * MaxSpeed / 2.5f));
-        else 
+        else
             _controller.SetHorizontalForce(Mathf.Lerp(_controller.Velocity.x, _normalizedHorizontalSpeed * MaxSpeed, movementFactor * Time.deltaTime));
-            
+
         // IMPORTANT NOTE: 1/3/2016 had to fix issues with vsync. Removed multiplying movementFactor by Time.deltaTime and used smaller values for the acceleration on ground/air.
         HandleAnimation();
     }
@@ -176,8 +178,12 @@ public class Player : MonoBehaviour, ITakeDamage {
             if (IsFacingRight)
                 Flip();
 
-        if (_controller.CanJump && Input.GetButtonDown("Jump")) {
-            _controller.Jump();
+        if (Input.GetButtonDown("Jump")) {
+
+            if (_controller.CanJump)
+                _controller.Jump();
+            else if (IsClimbing)
+                IsClimbing = false;
         }
 
         if (Input.GetButtonDown("Respawn"))

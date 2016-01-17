@@ -50,11 +50,14 @@ public class LevelManager : MonoBehaviour {
     }
 
     private IEnumerator KillPlayerCo() {
+
         Player.Kill();
         Camera.IsFollowing = false;
+
         yield return new WaitForSeconds(1.5f);
         yield return StartCoroutine(ScreenFader.instance.FadeToBlack());
 
+        Camera.transform.position = new Vector3(currentCheckPoint.transform.position.x, currentCheckPoint.transform.position.y, Camera.transform.position.z);
         Camera.IsFollowing = true;
         // Respawn recently killed enemies.
         foreach (var enemy in deadEnemies) {
@@ -66,8 +69,6 @@ public class LevelManager : MonoBehaviour {
         }
         // After enemies are respawned, empty the list.
         ClearDeadEnemies();
-
-        
 
         if (currentCheckPoint != null)
             currentCheckPoint.SpawnPlayer(Player);

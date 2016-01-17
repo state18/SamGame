@@ -7,6 +7,8 @@ using System.Collections;
 /// </summary>
 public class MovingMenu : MonoBehaviour {
     public float scrollRate;
+    // The higher the smoothing distance, the less the object will move based on the camera.
+    public float smoothingDistance;
     Transform background;
     public Vector3 rightBounds;
     public Vector3 leftBounds;
@@ -38,9 +40,10 @@ public class MovingMenu : MonoBehaviour {
             background.localPosition -= distanceBetweenBounds;
 
         // If this object is scrolling to the left, move it over to the left and then account for the camera movement to create perspective.
-        if (scrollDirection == Directions.Left)
-            background.Translate(-scrollRate * Time.deltaTime - camController.DeltaMovement.x, 0f, 0f);
-
+        if (scrollDirection == Directions.Left) {
+            // Accounting for camera movement and then multiplying it by the smoothing factor gives the illusion of parallax.
+            background.Translate(-scrollRate * Time.deltaTime - camController.DeltaMovement.x * smoothingDistance, 0f, 0f);
+        }
 
     }
 }

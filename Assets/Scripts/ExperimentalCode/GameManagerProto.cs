@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-
+//TODO make this class manage save data!
 public class GameManagerProto {
     public static GameManagerProto Instance { get { return null; } }
 
