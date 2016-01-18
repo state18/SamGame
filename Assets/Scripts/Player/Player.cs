@@ -89,9 +89,14 @@ public class Player : MonoBehaviour, ITakeDamage {
         // Movement factor determines distance per frame based on location ie ground, air, water, etc...
         if (IsDead)
             _controller.SetHorizontalForce(0);
-        else if (IsClimbing)
+        else if (IsClimbing) {
+
             _controller.SetForce(new Vector2(_normalizedHorizontalSpeed * MaxSpeed / 2.5f, _normalizedVerticalSpeed * MaxSpeed / 2.5f));
-        else
+
+            // Handles the intersection of ladders with the ground
+            if (_controller.State.IsCollidingBelow && _normalizedVerticalSpeed == -1)
+                IsClimbing = false;
+        } else
             _controller.SetHorizontalForce(Mathf.Lerp(_controller.Velocity.x, _normalizedHorizontalSpeed * MaxSpeed, movementFactor * Time.deltaTime));
 
         // IMPORTANT NOTE: 1/3/2016 had to fix issues with vsync. Removed multiplying movementFactor by Time.deltaTime and used smaller values for the acceleration on ground/air.

@@ -26,17 +26,19 @@ public class LevelManager : MonoBehaviour {
         Player = FindObjectOfType<Player>();
         Camera = FindObjectOfType<CameraController>();
         deadEnemies = new List<GameObject>();
-        
-#if UNITY_EDITOR
-        // If DebugSpawn is set, have it override the starting spawn point
-        if (DebugSpawn != null)
-            DebugSpawn.SpawnPlayer(Player);
-        else if (currentCheckPoint != null)
-            currentCheckPoint.SpawnPlayer(Player);
-#else
-        if (currentCheckPoint != null)
-            currentCheckPoint.SpawnPlayer(Player);
-#endif
+      
+        #if UNITY_EDITOR
+                // If DebugSpawn is set, have it override the starting spawn point
+                if (DebugSpawn != null)
+                    DebugSpawn.SpawnPlayer(Player);
+                else if (currentCheckPoint != null)
+                    currentCheckPoint.SpawnPlayer(Player);
+        #else
+                if (currentCheckPoint != null)
+                    currentCheckPoint.SpawnPlayer(Player);
+        #endif
+
+        Camera.transform.position = new Vector3(currentCheckPoint.transform.position.x, currentCheckPoint.transform.position.y, Camera.transform.position.z);
     }
 
     // TODO change checkpoint handling to fit my game. 
