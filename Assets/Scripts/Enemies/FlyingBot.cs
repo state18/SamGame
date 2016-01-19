@@ -38,6 +38,7 @@ public class FlyingBot : Enemy {
         playerTransform = FindObjectOfType<Player>().transform;
         playerController = playerTransform.GetComponent<CharacterController2D>();
         myCollider = GetComponent<BoxCollider2D>();
+        Health = MaxHealth;
 
         //AI initialized, and Patrol state is set
         brain = new StateMachine(PatrolState);
