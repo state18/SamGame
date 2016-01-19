@@ -8,7 +8,7 @@ public class JumpingGoblin : Enemy {
 	// Use this for initialization
 	void Start () {
         controller = GetComponent<CharacterController2D>();
-        direction = Vector2.left;
+        direction = Vector2.right;
         startPosition = transform.position;
         Health = MaxHealth;
 	}

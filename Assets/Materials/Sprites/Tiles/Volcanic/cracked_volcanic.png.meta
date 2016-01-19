@@ -1,14 +1,13 @@
 fileFormatVersion: 2
-guid: 9ac5b65179430d746b78b8fd52dd8cac
-timeCreated: 1437161599
+guid: 3090e85c2b45d634aa6a43e22a44077d
+timeCreated: 1453155258
 licenseType: Free
 TextureImporter:
-  fileIDToRecycleName:
-    21300000: sprite_12_0
+  fileIDToRecycleName: {}
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     linearTexture: 0
     correctGamma: 0
     fadeOut: 0
@@ -38,10 +37,10 @@ TextureImporter:
   lightmap: 0
   rGBM: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
-  alignment: 0
+  alignment: 6
   spritePivot: {x: .5, y: .5}
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spritePixelsToUnits: 16
@@ -49,17 +48,7 @@ TextureImporter:
   textureType: 8
   buildTargetSettings: []
   spriteSheet:
-    sprites:
-    - name: sprite_12_0
-      rect:
-        serializedVersion: 2
-        x: 7
-        y: 0
-        width: 28
-        height: 24
-      alignment: 9
-      pivot: {x: .400000006, y: .5}
-      border: {x: 0, y: 0, z: 0, w: 0}
+    sprites: []
   spritePackingTag: 1
   userData: 
   assetBundleName: 

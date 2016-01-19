@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: 2bb19d5af91281140986f4b009435203
-timeCreated: 1452126281
+guid: ed8d913f276c9874c94badd6dae8504f
+timeCreated: 1453146210
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
@@ -61,7 +61,7 @@ TextureImporter:
         width: 20
         height: 32
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
     - name: Jumping Goblin_1
       rect:
@@ -70,7 +70,7 @@ TextureImporter:
         y: 0
         width: 20
         height: 32
-      alignment: 6
+      alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
     - name: Jumping Goblin_2
@@ -80,7 +80,7 @@ TextureImporter:
         y: 0
         width: 20
         height: 32
-      alignment: 6
+      alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
     - name: Jumping Goblin_3
@@ -90,10 +90,10 @@ TextureImporter:
         y: 0
         width: 20
         height: 32
-      alignment: 6
+      alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-  spritePackingTag: 1
+  spritePackingTag: 
   userData: 
   assetBundleName: 
   assetBundleVariant: 

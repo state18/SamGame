@@ -24,6 +24,7 @@ public class MovingMenu : MonoBehaviour {
         // keep a reference to the transform to avoid GetComponent every frame.
         background = GetComponent<Transform>();
         camController = Camera.main.GetComponent<CameraController>();
+
         distanceBetweenBounds = rightBounds - leftBounds;
 
     }
@@ -33,17 +34,20 @@ public class MovingMenu : MonoBehaviour {
 
         // If this Game Object's relative position to its parent is less than the left bounds, move it over to the right bounds.
         // Else if this Game Object's relative position to its parent is greater than the right bounds, move it over to the left bounds.
-        if (background.localPosition.x < leftBounds.x) 
+        if (background.localPosition.x < leftBounds.x)
             background.localPosition += distanceBetweenBounds;
-        else if (background.localPosition.x > rightBounds.x) 
+        else if (background.localPosition.x > rightBounds.x)
             //Debug.Log("too far to the right");
             background.localPosition -= distanceBetweenBounds;
+
+        var camMovement = camController != null ? camController.DeltaMovement : Vector2.zero;
 
         // If this object is scrolling to the left, move it over to the left and then account for the camera movement to create perspective.
         if (scrollDirection == Directions.Left) {
             // Accounting for camera movement and then multiplying it by the smoothing factor gives the illusion of parallax.
-            background.Translate(-scrollRate * Time.deltaTime - camController.DeltaMovement.x * smoothingDistance, 0f, 0f);
+            background.Translate(-scrollRate * Time.deltaTime - camMovement.x * smoothingDistance, 0f, 0f);
         }
+
 
     }
 }
