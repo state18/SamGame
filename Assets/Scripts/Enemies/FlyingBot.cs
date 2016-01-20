@@ -19,7 +19,7 @@ public class FlyingBot : Enemy {
     public float yOffsetFromPlayer;                 //distance between the player and the target point of the entity (entity targets a point around player, not the player directly)
     public float delayUntilSlam;                    //how long will the entity wait until it slams after reaching the player?
                                                     //MoveToPlayer coroutine flag check
-    //bool isPreSlamDownwardsRunning = false;         //The coroutine should not be executed repeatedly while it is already running
+                                                    //bool isPreSlamDownwardsRunning = false;         //The coroutine should not be executed repeatedly while it is already running
 
     //SlamDownwards editable fields
     public LayerMask whatisGround;
@@ -32,16 +32,18 @@ public class FlyingBot : Enemy {
     CharacterController2D playerController;
 
     private IEnumerator<Transform> currentPoint;
+    private bool hasBeenInitialized = false;
 
     // Use this for initialization
     void Start() {
         playerTransform = FindObjectOfType<Player>().transform;
         playerController = playerTransform.GetComponent<CharacterController2D>();
+
         myCollider = GetComponent<BoxCollider2D>();
         Health = MaxHealth;
 
         //AI initialized, and Patrol state is set
-        brain = new StateMachine(PatrolState);
+        brain = new StateMachine(PatrolState, this);
 
         //brain.pushState (Patrol);
 
@@ -60,8 +62,21 @@ public class FlyingBot : Enemy {
             return;
 
         transform.position = currentPoint.Current.position;
+        startPosition = transform.position;
+        hasBeenInitialized = true;
     }
 
+    void OnEnable() {
+        if (hasBeenInitialized && brain.states.Count == 0)
+            brain.pushState(PatrolState);
+    }
+
+    void OnDisable() {
+        // Clear the state machine's history and reset possible altered attributes of this entity back to the default settings.
+        brain.clearStates();
+        GetComponent<SpriteRenderer>().color = Color.white;
+        GetComponent<Animator>().speed = 1;
+    }
 
     public IEnumerator PatrolState()    //Move around a contained area
     {
@@ -131,9 +146,9 @@ public class FlyingBot : Enemy {
 
             //Transition Checks: SlamDownwards, Patrol
 
-           
+
             #region To Patrol
-                if (!botBounds.Contains(playerTransform.position)) {
+            if (!botBounds.Contains(playerTransform.position)) {
                 //Debug.Log("movetoplayer to patrolling");
                 //StopCoroutine("PreSlamDownwardsCoroutine");
                 //isPreSlamDownwardsRunning = false;
@@ -169,9 +184,6 @@ public class FlyingBot : Enemy {
     {
         #region SlamDownwards Entry
         yield return null;
-        //TODO Speed up the animation of the bot, and give its color a different tint to let the player know it is about to slam.
-        //After a very short delay, the bot will descend a certain length or until it touches the ground. It will remain on the ground for a short while.
-        //This is where the player will be able to attack. Afterwards, transition it back to Patrol State.
         Animator botAnim = GetComponent<Animator>();                                                        //The bot changes to a red tint and doubles its animation speed
         SpriteRenderer botSprite = GetComponent<SpriteRenderer>();
         botAnim.speed = 2;
@@ -196,10 +208,10 @@ public class FlyingBot : Enemy {
             #region SlamDownwards Action
 
             float step = Speed * 1.5f;
-            
+
             if (hit.collider != null) {
                 //Debug.Log("Moving towards hit object!");
-                transform.position = Vector2.MoveTowards(transform.position, distanceWithOffset, step * Time.deltaTime);              
+                transform.position = Vector2.MoveTowards(transform.position, distanceWithOffset, step * Time.deltaTime);
             }
 
             var distanceSquared = (transform.position - distanceWithOffset).sqrMagnitude;
@@ -207,7 +219,7 @@ public class FlyingBot : Enemy {
             #endregion
 
             #region ToPatrol
-            
+
             if (distanceSquared < .01f) {
                 //Debug.Log("Going back to Patrol state from Slam State.");
                 // It is important we stop this as ending a parent coroutine does not end those nested inside of it.
@@ -215,7 +227,7 @@ public class FlyingBot : Enemy {
                 yield return new WaitForSeconds(delayUntilSlam);
                 //yield return StartCoroutine(WaitCo.Wait(delayUntilSlam));
                 //yield return CoroutineBridge.instance.myStartCoroutine(CoroutineBridge.instance.Wait(delayUntilSlam));
-                
+
                 brain.popState();
                 brain.pushState(PatrolState);
 
@@ -233,3 +245,7 @@ public class FlyingBot : Enemy {
 
 
 }
+
+
+// 1/19/2016: Figure out how to handle death/respawn of this enemy without unexpected behavior. EDIT: Maybe fixed? It seems to be working but I'm going to keep an eye on this enemy for awhile to make
+// sure nothing breaks.
