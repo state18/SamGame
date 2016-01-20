@@ -143,6 +143,8 @@ public class CharacterController2D : MonoBehaviour {
 
             MoveVertically(ref deltaMovement);
 
+            //IMPORTANT In addition to detecting platforms from below, detect them from above as well!
+
             // Handle horizontal collision with moving terrain from the right and left
             CorrectHorizontalPlacement(ref deltaMovement, true);
             CorrectHorizontalPlacement(ref deltaMovement, false);
@@ -160,7 +162,7 @@ public class CharacterController2D : MonoBehaviour {
         if (State.IsMovingUpSlope)
             _velocity.y = 0;
 
-        // Important: Platforms utilizing the ControllerStay2D method must account for the time between frames. (Example: conveyer belt speed * Time.deltaTime)  
+        // Remember: Platforms utilizing the ControllerStay2D method must account for the time between frames. (Example: conveyer belt speed * Time.deltaTime)  
         if (StandingOn != null) {
             _activeGlobalPlatformPoint = transform.position;
             _activeLocalPlatformPoint = StandingOn.transform.InverseTransformPoint(transform.position);
@@ -209,7 +211,6 @@ public class CharacterController2D : MonoBehaviour {
 
         for (int i = 1; i < TotalHorizontalRays - 1; i++) {
             var rayVector = new Vector2(deltaMovement.x + rayOrigin.x, deltaMovement.y + rayOrigin.y + (i * _verticalDistanceBetweenRays));
-            //      Debug.DrawRay(rayVector, rayDirection * halfWidth, isRight ? Color.cyan : Color.magenta);
 
             var raycastHit = Physics2D.Raycast(rayVector, rayDirection, halfWidth, MovingPlatformMask);
             if (!raycastHit)
