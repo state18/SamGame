@@ -44,7 +44,7 @@ public class StateMachine  // does not inherit from Monobehavior
             states.Push(state);
             runningCoroutine = entity.StartCoroutine(getCurrentState()());
             //runningCoroutine = CoroutineBridge.instance.myStartCoroutine (getCurrentState () ());     //Start the coroutine of the pushed state
-            Debug.Log("state pushed");
+            //Debug.Log("state pushed");
         }
     }
 

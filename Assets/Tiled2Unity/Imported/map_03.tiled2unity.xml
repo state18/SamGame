@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <!--Tiled2Unity generated xml data-->
 <!--Do not modify by hand-->
-<!--Last exported: 1/18/2016 6:16:45 PM-->
+<!--Last exported: 1/21/2016 3:08:40 PM-->
 <Tiled2Unity version="0.9.11.1">
   <AssignMaterial mesh="mesh_[00]_[03]" material="sprite_1" sortingLayerName="" sortingOrder="0" />
   <AssignMaterial mesh="mesh_[00]_[04]" material="sprite_3" sortingLayerName="" sortingOrder="0" />

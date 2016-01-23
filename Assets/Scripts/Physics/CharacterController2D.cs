@@ -26,9 +26,10 @@ public class CharacterController2D : MonoBehaviour {
     public ControllerParameters2D OverrideParameters { get; set; }
     public GameObject StandingOn { get; private set; }
     public Vector3 PlatformVelocity { get; private set; }
-
-    public bool CanJump {
-        get {
+    public bool CanJump
+    {
+        get
+        {
             if (Parameters.JumpRestrictions == ControllerParameters2D.JumpBehavior.CanJumpAnywhere)
                 return _jumpIn <= 0;
 
@@ -43,7 +44,7 @@ public class CharacterController2D : MonoBehaviour {
     private Transform _transform;
     private Vector3 _localScale;
     private BoxCollider2D _boxCollider;
-    
+
     private float _jumpIn;
     private GameObject _lastStandingOn;
 
@@ -132,6 +133,7 @@ public class CharacterController2D : MonoBehaviour {
         State.Reset();
 
         if (HandleCollisions) {
+
             HandlePlatforms();
             CalculateRayOrigins();
 
@@ -182,14 +184,60 @@ public class CharacterController2D : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// If the player is standing on a platform and that platform has moved, adjust the player's position accordingly.
+    /// It should be noted that no raycasting is done here to check for collisions.
+    /// </summary>
     private void HandlePlatforms() {
         if (StandingOn != null) {
             var newGlobalPlatformPoint = StandingOn.transform.TransformPoint(_activeLocalPlatformPoint);
             var moveDistance = newGlobalPlatformPoint - _activeGlobalPlatformPoint;
 
-            if (moveDistance != Vector3.zero)
-                transform.Translate(moveDistance, Space.World);
+            // New code will probably go inside of this if statement to check and make sure the translation is valid through the use of raycasting.
+            // Cast rays in the direction(s) of the PlatformVelocity that are not 0. If the ray hits something, 
+            if (moveDistance != Vector3.zero) {
 
+
+                if (moveDistance.x != 0f) {
+                    var isMovingRight = moveDistance.x > 0f ? true : false;
+                    // Insert vertical raycasting here
+                    var rayDistance = Mathf.Abs(moveDistance.x) + SkinWidth;
+                    var rayDirection = isMovingRight ? Vector2.right : Vector2.left;
+                    var rayOrigin = isMovingRight ? _raycastBottomRight : _raycastBottomLeft;
+
+                    for (var i = 0; i < TotalHorizontalRays; i++) {
+                        var rayVector = new Vector2(rayOrigin.x, rayOrigin.y + (i * _verticalDistanceBetweenRays));
+
+                        var rayCastHit = Physics2D.Raycast(rayVector, rayDirection, rayDistance, PlatformMask);
+                        if (!rayCastHit)
+                            continue;
+
+                        //if (i == 0 && HandleHorizontalSlope(ref deltaMovement, Vector2.Angle(rayCastHit.normal, Vector2.up), isGoingRight))
+                        //   break;
+
+                        // Furthest we can move without hitting an obstacle
+                        moveDistance.x = rayCastHit.point.x - rayVector.x;
+                        // Small optimization that shortens rayDistance to what we just hit
+                        rayDistance = Mathf.Abs(moveDistance.x);
+
+                        if (isMovingRight) {
+                            moveDistance.x -= SkinWidth;
+                            State.IsCollidingRight = true;
+                        } else {
+                            moveDistance.x += SkinWidth;
+                            State.IsCollidingLeft = true;
+                        }
+
+                        if (rayDistance < SkinWidth + .0001f)
+                            break;
+                    }
+                }
+                if (moveDistance.y != 0f) {
+                    var isMovingUp = moveDistance.y > 0f ? true : false;
+                    // Insert horizontal raycasting here
+                }
+                transform.Translate(moveDistance, Space.World);
+            }
             PlatformVelocity = (newGlobalPlatformPoint - _activeGlobalPlatformPoint) / Time.deltaTime;
         } else
             PlatformVelocity = Vector3.zero;
@@ -217,13 +265,20 @@ public class CharacterController2D : MonoBehaviour {
                 continue;
 
             offset = isRight ? ((raycastHit.point.x - _transform.position.x) - halfWidth) : (halfWidth - (_transform.position.x - raycastHit.point.x));
+
+            if (isRight)
+                State.IsCollidingRight = true;
+            else if (!isRight)
+                State.IsCollidingLeft = true;
         }
 
         // Performs the pushing of the player 
         deltaMovement.x += offset;
     }
 
-    // Where will the rays be shot out from?
+    /// <summary>
+    /// Determines where the rays will be raycasted from. This is based on the entity's box collider.
+    /// </summary>
     private void CalculateRayOrigins() {
         var size = new Vector2(_boxCollider.size.x * Mathf.Abs(_localScale.x), _boxCollider.size.y * Mathf.Abs(_localScale.y)) / 2;
         var center = new Vector2(_boxCollider.offset.x * _localScale.x, _boxCollider.offset.y * _localScale.y);
@@ -264,7 +319,7 @@ public class CharacterController2D : MonoBehaviour {
                 State.IsCollidingLeft = true;
             }
 
-            if (rayDistance < SkinWidth + .0001f) 
+            if (rayDistance < SkinWidth + 0f) //was .0001f
                 break;
         }
     }
@@ -307,10 +362,10 @@ public class CharacterController2D : MonoBehaviour {
                 State.IsCollidingBelow = true;
             }
 
-            if (!isGoingUp && deltaMovement.y > .0001f) 
+            if (!isGoingUp && deltaMovement.y > .0001f)
                 State.IsMovingUpSlope = true;
 
-            if (rayDistance < SkinWidth + .0001f)  
+            if (rayDistance < SkinWidth + .0001f)
                 break;
         }
     }

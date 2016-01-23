@@ -80,6 +80,9 @@ public class Player : MonoBehaviour, ITakeDamage {
 
     public void Update() {
 
+        if (_controller.State.IsCollidingLeft && _controller.State.IsCollidingRight)
+            LevelManager.Instance.KillPlayer();
+
         if (!IsDead)
             HandleInput();
 
