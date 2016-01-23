@@ -245,7 +245,7 @@ public class CharacterController2D : MonoBehaviour {
                     var rayDistance = Mathf.Abs(moveDistance.y) + SkinWidth;
 
                     for(var i = 0; i < TotalVerticalRays; i++) {
-                        var rayVector = new Vector2(_raycastTopLeft.x, _raycastTopLeft.y + (i * _horizontalDistanceBetweenRays));
+                        var rayVector = new Vector2(_raycastTopLeft.x + (i * _horizontalDistanceBetweenRays), _raycastTopLeft.y);
 
                         var rayCastHit = Physics2D.Raycast(rayVector, Vector2.up, rayDistance, PlatformMask);
                         if (!rayCastHit)
@@ -291,6 +291,7 @@ public class CharacterController2D : MonoBehaviour {
             var rayVector = new Vector2(rayOrigin.x, rayOrigin.y + (i * _verticalDistanceBetweenRays));
 
             var raycastHit = Physics2D.Raycast(rayVector, rayDirection, halfWidth, PlatformMask);
+
             if (!raycastHit)
                 continue;
 
@@ -315,11 +316,12 @@ public class CharacterController2D : MonoBehaviour {
 
         var offset = 0f;
 
-        for(int i = 1; i < TotalVerticalRays - 1; i++) {
+        for(int i = 0; i < TotalVerticalRays; i++) {
 
-            var rayVector = new Vector2(rayOrigin.x, rayOrigin.y + (i * _horizontalDistanceBetweenRays));
-
+            var rayVector = new Vector2(rayOrigin.x + (i * _horizontalDistanceBetweenRays), rayOrigin.y);
+            
             var raycastHit = Physics2D.Raycast(rayVector, Vector2.up, halfWidth, PlatformMask);
+            Debug.DrawRay(rayVector, Vector2.up * halfWidth, Color.red);
             if (!raycastHit)
                 continue;
 
@@ -352,7 +354,7 @@ public class CharacterController2D : MonoBehaviour {
 
         for (var i = 0; i < TotalHorizontalRays; i++) {
             var rayVector = new Vector2(rayOrigin.x, rayOrigin.y + (i * _verticalDistanceBetweenRays));
-            Debug.DrawRay(rayVector, rayDirection * rayDistance, Color.red);
+            //Debug.DrawRay(rayVector, rayDirection * rayDistance, Color.red);
 
             var rayCastHit = Physics2D.Raycast(rayVector, rayDirection, rayDistance, PlatformMask);
             if (!rayCastHit)
@@ -391,7 +393,7 @@ public class CharacterController2D : MonoBehaviour {
         var standingOnDistance = float.MaxValue;
         for (var i = 0; i < TotalVerticalRays; i++) {
             var rayVector = new Vector2(rayOrigin.x + (i * _horizontalDistanceBetweenRays), rayOrigin.y);
-            Debug.DrawRay(rayVector, rayDirection * rayDistance, Color.red);
+            Debug.DrawRay(rayVector, rayDirection * rayDistance, Color.magenta);
 
             var raycastHit = Physics2D.Raycast(rayVector, rayDirection, rayDistance, maskToUse);
             if (!raycastHit)
@@ -432,7 +434,7 @@ public class CharacterController2D : MonoBehaviour {
         var slopeDistance = SlopeLimitTangent * (_raycastBottomRight.x - center);
         var slopeRayVector = new Vector2(center, _raycastBottomLeft.y);
 
-        Debug.DrawRay(slopeRayVector, direction * slopeDistance, Color.yellow);
+        //Debug.DrawRay(slopeRayVector, direction * slopeDistance, Color.yellow);
         var raycastHit = Physics2D.Raycast(slopeRayVector, direction, slopeDistance, PlatformMask);
         if (!raycastHit)
             return;

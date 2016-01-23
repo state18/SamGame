@@ -11,7 +11,7 @@ public class LevelManager : MonoBehaviour {
 
     public Checkpoint currentCheckPoint { get; set; }
     public Checkpoint DebugSpawn;
-
+    private AudioSource gameOverSound;
     // Stores dead enemies that will revive if the player dies. 
     // Triggering a checkpoint will empty this list.
     private List<GameObject> deadEnemies;
@@ -25,6 +25,7 @@ public class LevelManager : MonoBehaviour {
         currentCheckPoint = GameObject.FindGameObjectWithTag("StartingPoint").GetComponent<Checkpoint>();
         Player = FindObjectOfType<Player>();
         Camera = FindObjectOfType<CameraController>();
+        gameOverSound = GetComponent<AudioSource>();
         deadEnemies = new List<GameObject>();
       
         #if UNITY_EDITOR
@@ -55,9 +56,13 @@ public class LevelManager : MonoBehaviour {
 
         Player.Kill();
         Camera.IsFollowing = false;
+        gameOverSound.Play();
+        
 
         yield return new WaitForSeconds(1.5f);
         yield return StartCoroutine(ScreenFader.instance.FadeToBlack());
+        while (gameOverSound.isPlaying)
+            yield return null;
 
         Camera.transform.position = new Vector3(currentCheckPoint.transform.position.x, currentCheckPoint.transform.position.y, Camera.transform.position.z);
         Camera.IsFollowing = true;
