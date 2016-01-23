@@ -258,7 +258,9 @@ public class CharacterController2D : MonoBehaviour {
         var offset = 0f;
 
         for (int i = 1; i < TotalHorizontalRays - 1; i++) {
-            var rayVector = new Vector2(deltaMovement.x + rayOrigin.x, deltaMovement.y + rayOrigin.y + (i * _verticalDistanceBetweenRays));
+            //The following line used to be ...  var rayVector = new Vector2(deltaMovement.x + rayOrigin.x, deltaMovement.y + rayOrigin.y + (i * _verticalDistanceBetweenRays));
+            // Taking out deltaMovement.x seems to have fixed the bouncing behavior against walls!
+            var rayVector = new Vector2(rayOrigin.x, deltaMovement.y + rayOrigin.y + (i * _verticalDistanceBetweenRays));
 
             var raycastHit = Physics2D.Raycast(rayVector, rayDirection, halfWidth, MovingPlatformMask);
             if (!raycastHit)
