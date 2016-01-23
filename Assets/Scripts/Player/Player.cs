@@ -80,7 +80,8 @@ public class Player : MonoBehaviour, ITakeDamage {
 
     public void Update() {
 
-        if (_controller.State.IsCollidingLeft && _controller.State.IsCollidingRight)
+        Debug.Log(_controller.State.ToString());
+        if ((_controller.State.IsCollidingLeft && _controller.State.IsCollidingRight) || _controller.State.IsCollidingAbove && _controller.State.IsCollidingBelow)
             LevelManager.Instance.KillPlayer();
 
         if (!IsDead)
@@ -133,6 +134,7 @@ public class Player : MonoBehaviour, ITakeDamage {
         IsDead = false;
         GetComponent<Collider2D>().enabled = true;
         _controller.HandleCollisions = true;
+        _controller.SetForce(Vector2.zero);
         playerSprite.enabled = true;
         FullHealth();
 

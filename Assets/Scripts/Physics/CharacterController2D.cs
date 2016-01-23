@@ -150,10 +150,16 @@ public class CharacterController2D : MonoBehaviour {
             // Handle horizontal collision with moving terrain from the right and left
             CorrectHorizontalPlacement(ref deltaMovement, true);
             CorrectHorizontalPlacement(ref deltaMovement, false);
+
+            CorrectVerticalPlacement(ref deltaMovement);
         }
 
-        // The actual movement of the player is performed. Calculations were done prior to this point.
-        _transform.Translate(deltaMovement, Space.World);
+        // If the entity is trapped between walls, don't perform the movement.
+        if (State.IsCollidingAbove && State.IsCollidingBelow || State.IsCollidingLeft && State.IsCollidingRight)
+            return;
+
+            // The actual movement of the player is performed. Calculations were done prior to this point.
+            _transform.Translate(deltaMovement, Space.World);
 
         if (Time.deltaTime > 0)
             _velocity = deltaMovement / Time.deltaTime;
@@ -232,10 +238,32 @@ public class CharacterController2D : MonoBehaviour {
                             break;
                     }
                 }
-                if (moveDistance.y != 0f) {
+                // Note: Here we only take upwards vertical movement into account since the entity is guaranteed to be standing on a platform.
+                if (moveDistance.y > 0f) {
                     var isMovingUp = moveDistance.y > 0f ? true : false;
                     // Insert horizontal raycasting here
+                    var rayDistance = Mathf.Abs(moveDistance.y) + SkinWidth;
+
+                    for(var i = 0; i < TotalVerticalRays; i++) {
+                        var rayVector = new Vector2(_raycastTopLeft.x, _raycastTopLeft.y + (i * _horizontalDistanceBetweenRays));
+
+                        var rayCastHit = Physics2D.Raycast(rayVector, Vector2.up, rayDistance, PlatformMask);
+                        if (!rayCastHit)
+                            continue;
+
+                        moveDistance.y = rayCastHit.point.y - rayVector.y;
+                        rayDistance = Mathf.Abs(moveDistance.y);
+
+                        if (isMovingUp) {
+                            moveDistance.y -= SkinWidth;
+                            State.IsCollidingAbove = true;
+                        }
+
+                        if (rayDistance < SkinWidth + .0001f)
+                            break;
+                    }
                 }
+
                 transform.Translate(moveDistance, Space.World);
             }
             PlatformVelocity = (newGlobalPlatformPoint - _activeGlobalPlatformPoint) / Time.deltaTime;
@@ -260,9 +288,9 @@ public class CharacterController2D : MonoBehaviour {
         for (int i = 1; i < TotalHorizontalRays - 1; i++) {
             //The following line used to be ...  var rayVector = new Vector2(deltaMovement.x + rayOrigin.x, deltaMovement.y + rayOrigin.y + (i * _verticalDistanceBetweenRays));
             // Taking out deltaMovement.x seems to have fixed the bouncing behavior against walls!
-            var rayVector = new Vector2(rayOrigin.x, deltaMovement.y + rayOrigin.y + (i * _verticalDistanceBetweenRays));
+            var rayVector = new Vector2(rayOrigin.x, rayOrigin.y + (i * _verticalDistanceBetweenRays));
 
-            var raycastHit = Physics2D.Raycast(rayVector, rayDirection, halfWidth, MovingPlatformMask);
+            var raycastHit = Physics2D.Raycast(rayVector, rayDirection, halfWidth, PlatformMask);
             if (!raycastHit)
                 continue;
 
@@ -276,6 +304,31 @@ public class CharacterController2D : MonoBehaviour {
 
         // Performs the pushing of the player 
         deltaMovement.x += offset;
+    }
+
+    // Account for the correct vertical placement of the entity with respect to moving platforms above.
+    public void CorrectVerticalPlacement(ref Vector2 deltaMovement) {
+        var halfWidth = (_boxCollider.size.y * _localScale.y) / 2f;
+        var rayOrigin = _raycastTopLeft;
+
+        rayOrigin.y -= (halfWidth - SkinWidth);
+
+        var offset = 0f;
+
+        for(int i = 1; i < TotalVerticalRays - 1; i++) {
+
+            var rayVector = new Vector2(rayOrigin.x, rayOrigin.y + (i * _horizontalDistanceBetweenRays));
+
+            var raycastHit = Physics2D.Raycast(rayVector, Vector2.up, halfWidth, PlatformMask);
+            if (!raycastHit)
+                continue;
+
+            offset = raycastHit.point.y - _transform.position.y - halfWidth;
+
+            State.IsCollidingAbove = true;
+        }
+
+        deltaMovement.y += offset;
     }
 
     /// <summary>
