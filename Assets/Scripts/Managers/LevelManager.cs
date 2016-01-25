@@ -57,12 +57,12 @@ public class LevelManager : MonoBehaviour {
         Player.Kill();
         Camera.IsFollowing = false;
         gameOverSound.Play();
-        
 
-        yield return new WaitForSeconds(1.5f);
-        yield return StartCoroutine(ScreenFader.instance.FadeToBlack());
         while (gameOverSound.isPlaying)
             yield return null;
+
+        yield return StartCoroutine(ScreenFader.instance.FadeToBlack());
+
 
         Camera.transform.position = new Vector3(currentCheckPoint.transform.position.x, currentCheckPoint.transform.position.y, Camera.transform.position.z);
         Camera.IsFollowing = true;

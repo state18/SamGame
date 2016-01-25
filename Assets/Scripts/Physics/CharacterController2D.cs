@@ -134,6 +134,7 @@ public class CharacterController2D : MonoBehaviour {
 
         if (HandleCollisions) {
 
+            CalculateRayOrigins();
             HandlePlatforms();
             CalculateRayOrigins();
 
@@ -144,8 +145,6 @@ public class CharacterController2D : MonoBehaviour {
                 MoveHorizontally(ref deltaMovement);
 
             MoveVertically(ref deltaMovement);
-
-            //IMPORTANT In addition to detecting platforms from below, detect them from above as well!
 
             // Handle horizontal collision with moving terrain from the right and left
             CorrectHorizontalPlacement(ref deltaMovement, true);
@@ -158,8 +157,8 @@ public class CharacterController2D : MonoBehaviour {
         if (State.IsCollidingAbove && State.IsCollidingBelow || State.IsCollidingLeft && State.IsCollidingRight)
             return;
 
-            // The actual movement of the player is performed. Calculations were done prior to this point.
-            _transform.Translate(deltaMovement, Space.World);
+        // The actual movement of the player is performed. Calculations were done prior to this point.
+        _transform.Translate(deltaMovement, Space.World);
 
         if (Time.deltaTime > 0)
             _velocity = deltaMovement / Time.deltaTime;
@@ -191,19 +190,19 @@ public class CharacterController2D : MonoBehaviour {
     }
 
     /// <summary>
-    /// If the player is standing on a platform and that platform has moved, adjust the player's position accordingly.
-    /// It should be noted that no raycasting is done here to check for collisions.
+    /// If the entity is standing on a platform and that platform has moved, adjust the player's position accordingly.
+    /// The raycasting portions check to make sure the entity is not passing through a wall.
     /// </summary>
     private void HandlePlatforms() {
         if (StandingOn != null) {
             var newGlobalPlatformPoint = StandingOn.transform.TransformPoint(_activeLocalPlatformPoint);
             var moveDistance = newGlobalPlatformPoint - _activeGlobalPlatformPoint;
 
-            // New code will probably go inside of this if statement to check and make sure the translation is valid through the use of raycasting.
-            // Cast rays in the direction(s) of the PlatformVelocity that are not 0. If the ray hits something, 
+            // IMPORTANT Currently bugged. When colliding into the side of a moving platform, sometimes moveDistance != 0. This should not happen.
+            // I question whether the CorrectHorizontal and CorrectVertical methods should be called after HorizontalMovement and VerticalMovement. Would it not make more sense to
+            // account for moving into objects and THEN apply the default movement since it will check for objects in its path anyway?
             if (moveDistance != Vector3.zero) {
-
-
+                Debug.Log("on a moving platform");
                 if (moveDistance.x != 0f) {
                     var isMovingRight = moveDistance.x > 0f ? true : false;
                     // Insert vertical raycasting here
@@ -211,9 +210,11 @@ public class CharacterController2D : MonoBehaviour {
                     var rayDirection = isMovingRight ? Vector2.right : Vector2.left;
                     var rayOrigin = isMovingRight ? _raycastBottomRight : _raycastBottomLeft;
 
-                    for (var i = 0; i < TotalHorizontalRays; i++) {
+                    // used to be for(var i = 0; i < TotalHorizontalRays; i++)
+                    for (var i = 1; i < TotalHorizontalRays - 1; i++) {
                         var rayVector = new Vector2(rayOrigin.x, rayOrigin.y + (i * _verticalDistanceBetweenRays));
 
+                        Debug.DrawRay(rayVector, rayDirection * rayDistance, Color.magenta);
                         var rayCastHit = Physics2D.Raycast(rayVector, rayDirection, rayDistance, PlatformMask);
                         if (!rayCastHit)
                             continue;
@@ -244,7 +245,7 @@ public class CharacterController2D : MonoBehaviour {
                     // Insert horizontal raycasting here
                     var rayDistance = Mathf.Abs(moveDistance.y) + SkinWidth;
 
-                    for(var i = 0; i < TotalVerticalRays; i++) {
+                    for (var i = 1; i < TotalVerticalRays - 1; i++) {
                         var rayVector = new Vector2(_raycastTopLeft.x + (i * _horizontalDistanceBetweenRays), _raycastTopLeft.y);
 
                         var rayCastHit = Physics2D.Raycast(rayVector, Vector2.up, rayDistance, PlatformMask);
@@ -263,7 +264,6 @@ public class CharacterController2D : MonoBehaviour {
                             break;
                     }
                 }
-
                 transform.Translate(moveDistance, Space.World);
             }
             PlatformVelocity = (newGlobalPlatformPoint - _activeGlobalPlatformPoint) / Time.deltaTime;
@@ -271,8 +271,10 @@ public class CharacterController2D : MonoBehaviour {
             PlatformVelocity = Vector3.zero;
 
         StandingOn = null;
+
     }
 
+    // Adjusts the entity's movement based on moving platforms from the left and right.
     private void CorrectHorizontalPlacement(ref Vector2 deltaMovement, bool isRight) {
         var halfWidth = (_boxCollider.size.x * _localScale.x) / 2f;
         var rayOrigin = isRight ? _raycastBottomRight : _raycastBottomLeft;
@@ -316,12 +318,12 @@ public class CharacterController2D : MonoBehaviour {
 
         var offset = 0f;
 
-        for(int i = 0; i < TotalVerticalRays; i++) {
+        for (int i = 1; i < TotalVerticalRays - 1; i++) {
 
-            var rayVector = new Vector2(rayOrigin.x + (i * _horizontalDistanceBetweenRays), rayOrigin.y);
-            
+            var rayVector = new Vector2( deltaMovement.x + rayOrigin.x + (i * _horizontalDistanceBetweenRays), rayOrigin.y);
+
             var raycastHit = Physics2D.Raycast(rayVector, Vector2.up, halfWidth, PlatformMask);
-            Debug.DrawRay(rayVector, Vector2.up * halfWidth, Color.red);
+            //Debug.DrawRay(rayVector, Vector2.up * halfWidth, Color.red);
             if (!raycastHit)
                 continue;
 
@@ -393,7 +395,7 @@ public class CharacterController2D : MonoBehaviour {
         var standingOnDistance = float.MaxValue;
         for (var i = 0; i < TotalVerticalRays; i++) {
             var rayVector = new Vector2(rayOrigin.x + (i * _horizontalDistanceBetweenRays), rayOrigin.y);
-            Debug.DrawRay(rayVector, rayDirection * rayDistance, Color.magenta);
+            Debug.DrawRay(rayVector, rayDirection * rayDistance, Color.blue);
 
             var raycastHit = Physics2D.Raycast(rayVector, rayDirection, rayDistance, maskToUse);
             if (!raycastHit)

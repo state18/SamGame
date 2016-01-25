@@ -80,7 +80,7 @@ public class Player : MonoBehaviour, ITakeDamage {
 
     public void Update() {
 
-        Debug.Log(_controller.State.ToString());
+        //Debug.Log(_controller.State.ToString());
         if ((_controller.State.IsCollidingLeft && _controller.State.IsCollidingRight) || _controller.State.IsCollidingAbove && _controller.State.IsCollidingBelow)
             LevelManager.Instance.KillPlayer();
 
@@ -212,7 +212,7 @@ public class Player : MonoBehaviour, ITakeDamage {
                 _animator.speed = 0;
 
 
-        _animator.SetBool("Ground", _controller.StandingOn != null);
+        _animator.SetBool("Ground", _controller.State.IsCollidingBelow);
 
     }
     // TODO IMPORTANT! This shows how to properly use the new projectile system! Use this with pistol item.
