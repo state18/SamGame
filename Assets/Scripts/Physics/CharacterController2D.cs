@@ -3,10 +3,10 @@ using System.Collections;
 /// <summary>
 /// This class acts as the controller for physical movement for entities. It is essentially a replacement for the Rigidbody2D component.
 /// </summary>
-public class CharacterController2D : MonoBehaviour {
+public class CharacterController2D : MonoBehaviour, IPushable {
 
     // "Skin" is how far inside the player do the rays begin?
-    private const float SkinWidth = .02f;
+    private const float SkinWidth = .01f;
     private const int TotalHorizontalRays = 8;
     private const int TotalVerticalRays = 4;
 
@@ -120,11 +120,34 @@ public class CharacterController2D : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// The entity reacts to an external object pushing it.
+    /// </summary>
+    /// <param name="push">Direction and intensity of the push</param>
+    public void PushHorizontal(float push) {
+        if (push > 0)
+            State.IsCollidingLeft = true;
+        else
+            State.IsCollidingRight = true;
+
+        // If the entity is trying to move in the opposite direction of the push, override it to avoid moving into the pushing object.
+        if (push > 0 && _velocity.x < 0f || push < 0 && _velocity.x > 0f)
+            SetHorizontalForce(push);
+        else
+            AddForce(new Vector2(push, 0f));
+    }
+
+    public void PushVertical(float push) {
+        AddForce(new Vector2(0f, push));
+    }
+
     public void LateUpdate() {
         _jumpIn -= Time.deltaTime;
         _velocity.y += Parameters.Gravity * Time.deltaTime;
 
-        // This line of code is why platforms must account for changing frames on their own. They are checked below.
+
+        HandlePlatformEffects();
+
         Move(Velocity * Time.deltaTime);
     }
 
@@ -147,10 +170,10 @@ public class CharacterController2D : MonoBehaviour {
             MoveVertically(ref deltaMovement);
 
             // Handle horizontal collision with moving terrain from the right and left
-            CorrectHorizontalPlacement(ref deltaMovement, true);
-            CorrectHorizontalPlacement(ref deltaMovement, false);
+            //CorrectHorizontalPlacement(ref deltaMovement, true);
+            //CorrectHorizontalPlacement(ref deltaMovement, false);
 
-            CorrectVerticalPlacement(ref deltaMovement);
+            //CorrectVerticalPlacement(ref deltaMovement);
         }
 
         // If the entity is trapped between walls, don't perform the movement.
@@ -174,17 +197,10 @@ public class CharacterController2D : MonoBehaviour {
             _activeGlobalPlatformPoint = transform.position;
             _activeLocalPlatformPoint = StandingOn.transform.InverseTransformPoint(transform.position);
 
-            if (_lastStandingOn != StandingOn) {
-                if (_lastStandingOn != null)
-                    _lastStandingOn.SendMessage("ControllerExit2D", this, SendMessageOptions.DontRequireReceiver);
-
-                StandingOn.SendMessage("ControllerEnter2D", this, SendMessageOptions.DontRequireReceiver);
+            if (_lastStandingOn != StandingOn)
                 _lastStandingOn = StandingOn;
-                // StandingOn did not change but isn't null.
-            } else if (StandingOn != null)
-                StandingOn.SendMessage("ControllerStay2D", this, SendMessageOptions.DontRequireReceiver);
+
         } else if (_lastStandingOn != null) {
-            _lastStandingOn.SendMessage("ControllerExit2D", this, SendMessageOptions.DontRequireReceiver);
             _lastStandingOn = null;
         }
     }
@@ -198,9 +214,6 @@ public class CharacterController2D : MonoBehaviour {
             var newGlobalPlatformPoint = StandingOn.transform.TransformPoint(_activeLocalPlatformPoint);
             var moveDistance = newGlobalPlatformPoint - _activeGlobalPlatformPoint;
 
-            // IMPORTANT Currently bugged. When colliding into the side of a moving platform, sometimes moveDistance != 0. This should not happen.
-            // I question whether the CorrectHorizontal and CorrectVertical methods should be called after HorizontalMovement and VerticalMovement. Would it not make more sense to
-            // account for moving into objects and THEN apply the default movement since it will check for objects in its path anyway?
             if (moveDistance != Vector3.zero) {
                 Debug.Log("on a moving platform");
                 if (moveDistance.x != 0f) {
@@ -274,6 +287,24 @@ public class CharacterController2D : MonoBehaviour {
 
     }
 
+    /// <summary>
+    /// Send messages ControllerEnter2D, ControllerStay2D, and ControllerExit2D to necessary platforms.
+    /// </summary>
+    private void HandlePlatformEffects() {
+        if (StandingOn != null) {
+            if (_lastStandingOn != StandingOn) {
+                if (_lastStandingOn != null)
+                    _lastStandingOn.SendMessage("ControllerExit2D", this, SendMessageOptions.DontRequireReceiver);
+
+                StandingOn.SendMessage("ControllerEnter2D", this, SendMessageOptions.DontRequireReceiver);
+            } else if (StandingOn != null)
+                StandingOn.SendMessage("ControllerStay2D", this, SendMessageOptions.DontRequireReceiver);
+
+        } else if (_lastStandingOn != null) {
+            _lastStandingOn.SendMessage("ControllerExit2D", this, SendMessageOptions.DontRequireReceiver);
+        }
+    }
+    /*
     // Adjusts the entity's movement based on moving platforms from the left and right.
     private void CorrectHorizontalPlacement(ref Vector2 deltaMovement, bool isRight) {
         var halfWidth = (_boxCollider.size.x * _localScale.x) / 2f;
@@ -304,11 +335,12 @@ public class CharacterController2D : MonoBehaviour {
             else if (!isRight)
                 State.IsCollidingLeft = true;
         }
-
+    
         // Performs the pushing of the player 
         deltaMovement.x += offset;
     }
-
+    */
+    /*
     // Account for the correct vertical placement of the entity with respect to moving platforms above.
     public void CorrectVerticalPlacement(ref Vector2 deltaMovement) {
         var halfWidth = (_boxCollider.size.y * _localScale.y) / 2f;
@@ -334,7 +366,7 @@ public class CharacterController2D : MonoBehaviour {
 
         deltaMovement.y += offset;
     }
-
+    */
     /// <summary>
     /// Determines where the rays will be raycasted from. This is based on the entity's box collider.
     /// </summary>

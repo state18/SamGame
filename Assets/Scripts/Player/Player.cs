@@ -80,9 +80,7 @@ public class Player : MonoBehaviour, ITakeDamage {
 
     public void Update() {
 
-        //Debug.Log(_controller.State.ToString());
-        if ((_controller.State.IsCollidingLeft && _controller.State.IsCollidingRight) || _controller.State.IsCollidingAbove && _controller.State.IsCollidingBelow)
-            LevelManager.Instance.KillPlayer();
+
 
         if (!IsDead)
             HandleInput();
@@ -96,17 +94,24 @@ public class Player : MonoBehaviour, ITakeDamage {
         else if (IsClimbing) {
 
             _controller.SetForce(new Vector2(_normalizedHorizontalSpeed * MaxSpeed / 2.5f, _normalizedVerticalSpeed * MaxSpeed / 2.5f));
-
             // Handles the intersection of ladders with the ground
             if (_controller.State.IsCollidingBelow && _normalizedVerticalSpeed == -1)
                 IsClimbing = false;
-        } else
-            _controller.SetHorizontalForce(Mathf.Lerp(_controller.Velocity.x, _normalizedHorizontalSpeed * MaxSpeed, movementFactor * Time.deltaTime));
+        } else  { // IMPORTANT : Possibly use a delegate/event so whenever the CharacterController2D is pushed, this class has a boolean that gets turned on. It will reset every frame.
+            _controller.SetHorizontalForce(_normalizedHorizontalSpeed * MaxSpeed);
+            // Acceleration Movement: Currently disabled until a solution is found to make it behave with the rest of the physics engine.
+            //_controller.SetHorizontalForce(Mathf.Lerp(_controller.Velocity.x, _normalizedHorizontalSpeed * MaxSpeed, movementFactor * Time.deltaTime));
+        }
 
         // NOTE: 1/3/2016 had to fix issues with vsync. Removed multiplying movementFactor by Time.deltaTime and used smaller values for the acceleration on ground/air.
         HandleAnimation();
     }
 
+    void LateUpdate() {
+        Debug.Log(_controller.State.ToString());
+        if ((_controller.State.IsCollidingLeft && _controller.State.IsCollidingRight) || _controller.State.IsCollidingAbove && _controller.State.IsCollidingBelow)
+            LevelManager.Instance.KillPlayer();
+    }
     /// <summary>
     /// Kills the player.
     /// </summary>
