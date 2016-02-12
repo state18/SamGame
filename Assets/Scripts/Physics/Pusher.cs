@@ -126,7 +126,6 @@ public class Pusher : MonoBehaviour {
                 var amountToPush = boxOrigin.x + deltaMovement.x - hit.point.x;
                 amountToPush = isGoingRight ? amountToPush + BoxThickness /2f : amountToPush - BoxThickness /2f;
                 pushable.PushHorizontal(amountToPush / Time.deltaTime);
-                Debug.Log(amountToPush);
             }
         }
 

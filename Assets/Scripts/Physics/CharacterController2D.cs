@@ -41,6 +41,7 @@ public class CharacterController2D : MonoBehaviour, IPushable {
     }
 
     private Vector2 _velocity;
+    private Vector2 _pusherVelocity;
     private Transform _transform;
     private Vector3 _localScale;
     private BoxCollider2D _boxCollider;
@@ -130,11 +131,7 @@ public class CharacterController2D : MonoBehaviour, IPushable {
         else
             State.IsCollidingRight = true;
 
-        // If the entity is trying to move in the opposite direction of the push, override it to avoid moving into the pushing object.
-        if (push > 0 && _velocity.x < 0f || push < 0 && _velocity.x > 0f)
-            SetHorizontalForce(push);
-        else
-            AddForce(new Vector2(push, 0f));
+        _pusherVelocity.x += push;
     }
 
     public void PushVertical(float push) {
@@ -143,8 +140,13 @@ public class CharacterController2D : MonoBehaviour, IPushable {
 
     public void LateUpdate() {
         _jumpIn -= Time.deltaTime;
+
+        // Apply gravity.
         _velocity.y += Parameters.Gravity * Time.deltaTime;
 
+        State.Reset();
+
+        HandlePushing(_pusherVelocity * Time.deltaTime);
 
         HandlePlatformEffects();
 
@@ -152,17 +154,13 @@ public class CharacterController2D : MonoBehaviour, IPushable {
     }
 
     private void Move(Vector2 deltaMovement) {
-        var wasGrounded = State.IsCollidingBelow;
-        State.Reset();
+        //var wasGrounded = State.IsCollidingBelow;
+        //State.Reset();
 
         if (HandleCollisions) {
 
-            CalculateRayOrigins();
             HandlePlatforms();
             CalculateRayOrigins();
-
-            if (deltaMovement.y < 0 && wasGrounded)
-                HandleVerticalSlope(ref deltaMovement);
 
             if (Mathf.Abs(deltaMovement.x) > 0f) // was .001f before the collision fix
                 MoveHorizontally(ref deltaMovement);
@@ -205,11 +203,22 @@ public class CharacterController2D : MonoBehaviour, IPushable {
         }
     }
 
+    private void HandlePushing(Vector2 deltaMovement) {
+        CalculateRayOrigins();
+        if (Mathf.Abs(deltaMovement.x) > 0) {
+            MoveHorizontally(ref deltaMovement);
+            Debug.Log("being pushed");
+        }
+
+        _transform.Translate(deltaMovement, Space.World);
+        _pusherVelocity = Vector2.zero;
+    }
     /// <summary>
     /// If the entity is standing on a platform and that platform has moved, adjust the player's position accordingly.
     /// The raycasting portions check to make sure the entity is not passing through a wall.
     /// </summary>
     private void HandlePlatforms() {
+        CalculateRayOrigins();
         if (StandingOn != null) {
             var newGlobalPlatformPoint = StandingOn.transform.TransformPoint(_activeLocalPlatformPoint);
             var moveDistance = newGlobalPlatformPoint - _activeGlobalPlatformPoint;
