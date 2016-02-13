@@ -97,7 +97,7 @@ public class Player : MonoBehaviour, ITakeDamage {
             // Handles the intersection of ladders with the ground
             if (_controller.State.IsCollidingBelow && _normalizedVerticalSpeed == -1)
                 IsClimbing = false;
-        } else  { // IMPORTANT : Possibly use a delegate/event so whenever the CharacterController2D is pushed, this class has a boolean that gets turned on. It will reset every frame.
+        } else  {
             _controller.SetHorizontalForce(_normalizedHorizontalSpeed * MaxSpeed);
             // Acceleration Movement: Currently disabled until a solution is found to make it behave with the rest of the physics engine.
             //_controller.SetHorizontalForce(Mathf.Lerp(_controller.Velocity.x, _normalizedHorizontalSpeed * MaxSpeed, movementFactor * Time.deltaTime));

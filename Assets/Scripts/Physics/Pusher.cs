@@ -39,7 +39,7 @@ public class Pusher : MonoBehaviour {
         //if (Mathf.Abs(deltaMovement.y) > 0)
         //CheckVerticalCollision(deltaMovement);
 
-        if (Mathf.Abs(deltaMovement.x) > 0)
+        //if (Mathf.Abs(deltaMovement.x) > 0)
             CheckHorizontalCollision(deltaMovement);
 
         positionLastFrame = _transform.position;
@@ -47,16 +47,17 @@ public class Pusher : MonoBehaviour {
 
     /// <summary>
     /// The key points where the rays will originate are established based on the position before movement.
+    /// Note: These points assume the origin of the transform is at the bottom left of the box collider!!!
     /// </summary>
     private void CalculateBoxOrigins() {
-        var size = new Vector2(_boxCollider.size.x * Mathf.Abs(_localScale.x), _boxCollider.size.y * Mathf.Abs(_localScale.y)) / 2f;
+        var size = new Vector2(_boxCollider.size.x * Mathf.Abs(_localScale.x), _boxCollider.size.y * Mathf.Abs(_localScale.y));
         var center = new Vector2(_boxCollider.offset.x * _localScale.x, _boxCollider.offset.y * _localScale.y);
 
         // These 3 vectors contain the origin points needed.
-        _boxcastLeft = positionLastFrame + new Vector3(center.x - size.x + BoxThickness /2f, 0f);
-        _boxcastRight = positionLastFrame + new Vector3(center.x + size.x - BoxThickness /2f, 0f);
-        _boxcastUp = positionLastFrame + new Vector3(0f, center.y + size.y - BoxThickness /2f);
-        _boxcastDown = positionLastFrame + new Vector3(0f, center.y - size.y + BoxThickness /2f);
+        _boxcastLeft = positionLastFrame + new Vector3(BoxThickness /2f, center.y);
+        _boxcastRight = positionLastFrame + new Vector3(size.x - BoxThickness /2f, center.y);
+        _boxcastUp = positionLastFrame + new Vector3(center.x, center.y + size.y - BoxThickness /2f);
+        _boxcastDown = positionLastFrame + new Vector3(center.x, center.y - size.y + BoxThickness /2f);
     }
 
     /*
@@ -110,12 +111,12 @@ public class Pusher : MonoBehaviour {
         var boxDistance = Mathf.Abs(deltaMovement.x);
         var boxDirection = isGoingRight ? Vector2.right : -Vector2.right;
         var boxOrigin = isGoingRight ? _boxcastRight : _boxcastLeft;
-        var boxDimensions = new Vector2(BoxThickness, _boxCollider.size.y * Mathf.Abs(_localScale.y));
+        var boxDimensions = new Vector2(BoxThickness, _boxCollider.size.y * Mathf.Abs(_localScale.y) - .05f);   //Think of the .05f as skin from the CharacterController2D.
 
         //Debug.DrawRay(rayVector, boxDirection * boxDistance, Color.red);
         var boxCastHit = Physics2D.BoxCastAll(boxOrigin, boxDimensions, 0f, boxDirection, boxDistance);
-        //Debug.DrawLine(_boxcastLeft, _boxcastRight, Color.magenta);
-        //Debug.DrawLine(_boxcastDown, _boxcastUp, Color.red);
+        Debug.DrawLine(_boxcastLeft, _boxcastRight, Color.magenta);
+        Debug.DrawLine(_boxcastDown, _boxcastUp, Color.red);
         if (boxCastHit.Length == 0)
             return;
 
@@ -124,7 +125,7 @@ public class Pusher : MonoBehaviour {
             var pushable = (IPushable)hit.collider.GetComponent(typeof(IPushable));
             if (pushable != null) {
                 var amountToPush = boxOrigin.x + deltaMovement.x - hit.point.x;
-                amountToPush = isGoingRight ? amountToPush + BoxThickness /2f : amountToPush - BoxThickness /2f;
+                amountToPush = isGoingRight ? amountToPush + BoxThickness /2f: amountToPush - BoxThickness /2f;
                 pushable.PushHorizontal(amountToPush / Time.deltaTime);
             }
         }

@@ -3,7 +3,7 @@ using System.Collections;
 /// <summary>
 /// This class acts as the controller for physical movement for entities. It is essentially a replacement for the Rigidbody2D component.
 /// </summary>
-public class CharacterController2D : MonoBehaviour, IPushable {
+public class CharacterController2D : MonoBehaviour, IPushable { // IMPORTANT: Edge problem with moving platforms. Take a look at logic/math behind MoveVertical and MoveHorizontal.
 
     // "Skin" is how far inside the player do the rays begin?
     private const float SkinWidth = .01f;
@@ -14,7 +14,6 @@ public class CharacterController2D : MonoBehaviour, IPushable {
 
     // What do we collide with?
     public LayerMask PlatformMask;
-    public LayerMask MovingPlatformMask;
     public LayerMask OneWayMask;
     public ControllerParameters2D DefaultParameters;
 
@@ -167,6 +166,7 @@ public class CharacterController2D : MonoBehaviour, IPushable {
 
             MoveVertically(ref deltaMovement);
 
+
             // Handle horizontal collision with moving terrain from the right and left
             //CorrectHorizontalPlacement(ref deltaMovement, true);
             //CorrectHorizontalPlacement(ref deltaMovement, false);
@@ -222,10 +222,11 @@ public class CharacterController2D : MonoBehaviour, IPushable {
         if (StandingOn != null) {
             var newGlobalPlatformPoint = StandingOn.transform.TransformPoint(_activeLocalPlatformPoint);
             var moveDistance = newGlobalPlatformPoint - _activeGlobalPlatformPoint;
-
+            
             if (moveDistance != Vector3.zero) {
                 Debug.Log("on a moving platform");
                 if (moveDistance.x != 0f) {
+                    
                     var isMovingRight = moveDistance.x > 0f ? true : false;
                     // Insert vertical raycasting here
                     var rayDistance = Mathf.Abs(moveDistance.x) + SkinWidth;
@@ -263,6 +264,7 @@ public class CharacterController2D : MonoBehaviour, IPushable {
                 }
                 // Note: Here we only take upwards vertical movement into account since the entity is guaranteed to be standing on a platform.
                 if (moveDistance.y > 0f) {
+                    
                     var isMovingUp = moveDistance.y > 0f ? true : false;
                     // Insert horizontal raycasting here
                     var rayDistance = Mathf.Abs(moveDistance.y) + SkinWidth;
@@ -285,6 +287,7 @@ public class CharacterController2D : MonoBehaviour, IPushable {
                         if (rayDistance < SkinWidth + .0001f)
                             break;
                     }
+                    
                 }
                 transform.Translate(moveDistance, Space.World);
             }
@@ -397,7 +400,7 @@ public class CharacterController2D : MonoBehaviour, IPushable {
 
         for (var i = 0; i < TotalHorizontalRays; i++) {
             var rayVector = new Vector2(rayOrigin.x, rayOrigin.y + (i * _verticalDistanceBetweenRays));
-            //Debug.DrawRay(rayVector, rayDirection * rayDistance, Color.red);
+            Debug.DrawRay(rayVector, rayDirection * rayDistance, Color.red);
 
             var rayCastHit = Physics2D.Raycast(rayVector, rayDirection, rayDistance, PlatformMask);
             if (!rayCastHit)
@@ -433,6 +436,7 @@ public class CharacterController2D : MonoBehaviour, IPushable {
         var maskToUse = isGoingUp ? PlatformMask.value : PlatformMask | OneWayMask;
 
         rayOrigin.x += deltaMovement.x;
+        //Debug.Log(deltaMovement.x);
         var standingOnDistance = float.MaxValue;
         for (var i = 0; i < TotalVerticalRays; i++) {
             var rayVector = new Vector2(rayOrigin.x + (i * _horizontalDistanceBetweenRays), rayOrigin.y);
