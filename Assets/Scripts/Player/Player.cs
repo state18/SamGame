@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 using System;
-// TODO think about adding Health Manager separately ?
+
 /// <summary>
 /// The Player class handles actions specific to the player. A lot of these actions interact with the CharacterController2D class.
 /// </summary>
@@ -11,6 +12,7 @@ public class Player : MonoBehaviour, ITakeDamage {
     private CharacterController2D _controller;
     private Animator _animator;
     private SpriteRenderer playerSprite;
+    private BoxCollider2D _collider;
     private float _normalizedHorizontalSpeed;
     private float _normalizedVerticalSpeed;
 
@@ -43,6 +45,8 @@ public class Player : MonoBehaviour, ITakeDamage {
     private bool isClimbing;
     // Tracks how many ladder colliders the player is inside of. This is necessary for adjacent ladders to function properly.
     public int LadderColliderCount { get; set; }
+    // Will hold all of the OnTriggerExit2D methods of the colliders the player is currently in. (This is so they get called even when the player is disabled upon death.)
+    public Action<Collider2D> ExitAllTriggers;
 
     public bool IsClimbing
     {
@@ -71,6 +75,7 @@ public class Player : MonoBehaviour, ITakeDamage {
     public void Awake() {
         _controller = GetComponent<CharacterController2D>();
         _animator = GetComponent<Animator>();
+        _collider = GetComponent<BoxCollider2D>();
         playerSprite = GetComponent<SpriteRenderer>();
         //TODO maybe find a better way to handle audio source organization.
         ouchEffect = GetComponent<AudioSource>();
@@ -98,7 +103,7 @@ public class Player : MonoBehaviour, ITakeDamage {
             // Handles the intersection of ladders with the ground
             if (_controller.State.IsCollidingBelow && _normalizedVerticalSpeed == -1)
                 IsClimbing = false;
-        } else  {
+        } else {
             _controller.SetHorizontalForce(_normalizedHorizontalSpeed * MaxSpeed);
             // Acceleration Movement: Currently disabled until a solution is found to make it behave with the rest of the physics engine.
             //_controller.SetHorizontalForce(Mathf.Lerp(_controller.Velocity.x, _normalizedHorizontalSpeed * MaxSpeed, movementFactor * Time.deltaTime));
@@ -115,6 +120,8 @@ public class Player : MonoBehaviour, ITakeDamage {
         CancelInvoke("SpriteToggle");
         _controller.HandleCollisions = false;
         GetComponent<Collider2D>().enabled = false;
+        if (ExitAllTriggers != null)
+            ExitAllTriggers(_collider);
         IsDead = true;
         Health = 0;
 
@@ -257,13 +264,11 @@ public class Player : MonoBehaviour, ITakeDamage {
 
 
     }
-
     /// <summary>
     /// The SpriteRenderer component is toggled on or off
     /// </summary>
     private void SpriteToggle() {
         if (IsInvulnerable)
             playerSprite.enabled = !playerSprite.enabled;
-
     }
 }

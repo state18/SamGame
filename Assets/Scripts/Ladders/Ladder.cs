@@ -23,6 +23,7 @@ public class Ladder : MonoBehaviour {
     void OnTriggerEnter2D(Collider2D other) {
         Player player = other.GetComponent<Player>();
         if (player != null) {
+            player.ExitAllTriggers += OnTriggerExit2D;
             inside = true;
             player.LadderColliderCount++;
         }
@@ -31,6 +32,7 @@ public class Ladder : MonoBehaviour {
     void OnTriggerExit2D(Collider2D other) {
         Player player = other.GetComponent<Player>();
         if (player != null) {
+            player.ExitAllTriggers -= OnTriggerExit2D;
             inside = false;
             player.LadderColliderCount--;
             if (player.LadderColliderCount == 0)

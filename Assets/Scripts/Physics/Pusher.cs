@@ -4,7 +4,7 @@ using System.Collections.Generic;
 /// <summary>
 /// Any GameObject with this component will push entities with the IPushable interface on any of their components upon collision.
 /// </summary>
-public class Pusher : MonoBehaviour {
+public class Pusher : MonoBehaviour { // IMPORTANT: The math is probably not 100% correct because sometimes the player will die when walking into oncoming pusher. FIX THIS
 
     private const float BoxThickness = .02f;
 
@@ -33,7 +33,6 @@ public class Pusher : MonoBehaviour {
     void Update() {
 
         Vector2 deltaMovement = _transform.position - positionLastFrame;
-
         CalculateBoxOrigins(deltaMovement);
 
         if (deltaMovement.y < 0)
@@ -62,10 +61,10 @@ public class Pusher : MonoBehaviour {
         */
 
         // Experimental code to replace the above code. It seems more generic (It doesn't rely on the Transform having a pivot point around a certain area)
-        _boxcastLeft = _boxCollider.bounds.center - new Vector3(_boxCollider.bounds.extents.x, 0f) - deltaMovement;
-        _boxcastRight = _boxCollider.bounds.center + new Vector3(_boxCollider.bounds.extents.x, 0f) - deltaMovement;
-        _boxcastUp = _boxCollider.bounds.center + new Vector3(0f, _boxCollider.bounds.extents.y) - deltaMovement;
-        _boxcastDown = _boxCollider.bounds.center - new Vector3(0f, _boxCollider.bounds.extents.y) - deltaMovement;
+        _boxcastLeft = _boxCollider.bounds.center - new Vector3(_boxCollider.bounds.extents.x - BoxThickness/2f, 0f) - deltaMovement;
+        _boxcastRight = _boxCollider.bounds.center + new Vector3(_boxCollider.bounds.extents.x - BoxThickness/2f, 0f) - deltaMovement;
+        _boxcastUp = _boxCollider.bounds.center + new Vector3(0f, _boxCollider.bounds.extents.y - BoxThickness/2f) - deltaMovement;
+        _boxcastDown = _boxCollider.bounds.center - new Vector3(0f, _boxCollider.bounds.extents.y - BoxThickness/2f) - deltaMovement;
     }
 
     /// <summary>
@@ -85,7 +84,7 @@ public class Pusher : MonoBehaviour {
         foreach (var hit in boxCastHit) {
             var pushable = (IPushable)hit.collider.GetComponent(typeof(IPushable));
             if (pushable != null) {
-                var amountToPush = _boxcastDown.y + deltaMovement.y - hit.point.y - BoxThickness / 2f;
+                var amountToPush = _boxcastDown.y + deltaMovement.y - hit.point.y;
                 pushable.PushVertical(amountToPush / Time.deltaTime);
             }
         }
@@ -115,7 +114,9 @@ public class Pusher : MonoBehaviour {
             var pushable = (IPushable)hit.collider.GetComponent(typeof(IPushable));
             if (pushable != null) {
                 var amountToPush = boxOrigin.x + deltaMovement.x - hit.point.x;
-                amountToPush = isGoingRight ? amountToPush + BoxThickness / 2f : amountToPush - BoxThickness / 2f;
+                Debug.Log(hit.point);
+                //amountToPush = isGoingRight ? amountToPush + BoxThickness : amountToPush - BoxThickness;
+                Debug.Log(amountToPush);
                 pushable.PushHorizontal(amountToPush / Time.deltaTime);
             }
         }

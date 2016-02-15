@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class LevelTransport : MonoBehaviour
 {
@@ -10,7 +11,7 @@ public class LevelTransport : MonoBehaviour
 		if (other.tag == "Player") {
 			ScreenFader sf = GameObject.FindGameObjectWithTag ("Fader").GetComponent<ScreenFader> ();
 			yield return StartCoroutine (sf.FadeToBlack ());
-			Application.LoadLevel (levelIndex);
+			SceneManager.LoadScene(levelIndex);
 		}
 	}
 }

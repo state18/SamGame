@@ -6,6 +6,7 @@ public class LadderTop : MonoBehaviour {
     // Maybe have a very brief window of time where an animation plays and prevents the player from moving.
     Player player;
     Vector3 playerScale;
+    bool playerInside;
     //Animator anim;
 
     // Use this for initialization
@@ -15,26 +16,25 @@ public class LadderTop : MonoBehaviour {
         playerScale = player.transform.localScale;
     }
 
-    void OnTriggerStay2D(Collider2D other) {
-        if (other.tag == "Player") {
-
-
+    void Update() {
+        if (playerInside) {
+            //Debug.Log("player inside.");
             if (!player.IsClimbing && Input.GetAxisRaw("Vertical") == -1) {
-                var yOffset = other.GetComponent<BoxCollider2D>().size.y / 2 * playerScale.y;
+                var yOffset = player.GetComponent<BoxCollider2D>().size.y / 2 * playerScale.y;
                 // The amount we translate should be the difference between the destination point and the current center of the player's collider.
                 Vector3 desiredDestination = new Vector3(transform.position.x, transform.position.y - yOffset + .2f, transform.position.z);
 
-                other.transform.position = desiredDestination;
+                player.transform.position = desiredDestination;
                 player.IsClimbing = true;
 
             } else if (player.IsClimbing && Input.GetAxisRaw("Vertical") == 1) {
 
                 // anim.SetTrigger("LadderExit");
-                var yOffset = other.GetComponent<BoxCollider2D>().size.y / 2 * playerScale.y;
+                var yOffset = player.GetComponent<BoxCollider2D>().size.y / 2 * playerScale.y;
                 // The amount we translate should be the difference between the destination point and the current center of the player's collider.
                 Vector3 desiredDestination = new Vector3(transform.position.x, transform.position.y + yOffset, transform.position.z);
 
-                other.transform.position = desiredDestination;
+                player.transform.position = desiredDestination;
                 player.IsClimbing = false;
 
 
@@ -42,10 +42,18 @@ public class LadderTop : MonoBehaviour {
         }
 
     }
-    /*
-    void OnTriggerExit2D(Collider2D other) {
-        if (other.tag == "Player")
-            player.IsClimbing = false;
+    void OnTriggerEnter2D(Collider2D other) {
+
+        if (other.GetComponent<Player>()) {
+            playerInside = true;
+            player.ExitAllTriggers += OnTriggerExit2D;
+        }
     }
-    */
+
+    void OnTriggerExit2D(Collider2D other) {
+        if (other.GetComponent<Player>()) {
+            playerInside = false;
+            player.ExitAllTriggers -= OnTriggerExit2D;
+        }
+    }
 }

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class NewGameButton : MenuButton
 {
@@ -32,7 +33,7 @@ public class NewGameButton : MenuButton
 		Debug.Log ("Fading to Black");
 		ScreenFader sf = GameObject.FindGameObjectWithTag ("Fader").GetComponent<ScreenFader> ();
 		yield return StartCoroutine (sf.FadeToBlack ());
-		Application.LoadLevel (1);
+		SceneManager.LoadScene(1);
 
 	}
 }

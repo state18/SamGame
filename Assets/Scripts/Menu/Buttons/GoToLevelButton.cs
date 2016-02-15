@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class GoToLevelButton : MenuButton
 {
@@ -33,7 +34,7 @@ public class GoToLevelButton : MenuButton
 		Debug.Log ("Fading to Black");
 		ScreenFader sf = GameObject.FindGameObjectWithTag ("Fader").GetComponent<ScreenFader> ();
 		yield return StartCoroutine (sf.FadeToBlack ());
-		Application.LoadLevel (levelToLoad);
+		SceneManager.LoadScene(levelToLoad);
 		
 	}
 }
