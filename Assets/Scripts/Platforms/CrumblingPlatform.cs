@@ -20,6 +20,12 @@ public class CrumblingPlatform : MonoBehaviour {
     public void ControllerEnter2D(CharacterController2D controller) {
         if (controller.GetComponent<Player>() && !isCrumbling)
             StartCoroutine("Crumble");
+
+        Debug.Log("entered platform");
+    }
+
+    public void ControllerExit2D() {
+        Debug.Log("leaving platform");
     }
 
     private IEnumerator Crumble() {

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 /// </summary>
 public class Pusher : MonoBehaviour {
 
-    private const float BoxThickness = .02f; 
+    private const float BoxThickness = .02f;
 
     private Vector2
         _boxcastLeft,
@@ -20,10 +20,7 @@ public class Pusher : MonoBehaviour {
     private Vector3 _localScale;
     private Transform _transform;
 
-    [SerializeField]
-    LayerMask layer;
 
-    private float speed;
     // Use this for initialization
     void Start() {
         _transform = transform;
@@ -34,12 +31,15 @@ public class Pusher : MonoBehaviour {
     }
 
     void Update() {
-        CalculateBoxOrigins();
-        var deltaMovement = _transform.position - positionLastFrame;
-        //if (Mathf.Abs(deltaMovement.y) > 0)
-        //CheckVerticalCollision(deltaMovement);
 
-        //if (Mathf.Abs(deltaMovement.x) > 0)
+        Vector2 deltaMovement = _transform.position - positionLastFrame;
+
+        CalculateBoxOrigins(deltaMovement);
+
+        if (deltaMovement.y < 0)
+            CheckVerticalCollision(deltaMovement);
+
+        if (Mathf.Abs(deltaMovement.x) > 0)
             CheckHorizontalCollision(deltaMovement);
 
         positionLastFrame = _transform.position;
@@ -49,58 +49,48 @@ public class Pusher : MonoBehaviour {
     /// The key points where the rays will originate are established based on the position before movement.
     /// Note: These points assume the origin of the transform is at the bottom left of the box collider!!!
     /// </summary>
-    private void CalculateBoxOrigins() {
-        var size = new Vector2(_boxCollider.size.x * Mathf.Abs(_localScale.x), _boxCollider.size.y * Mathf.Abs(_localScale.y));
-        var center = new Vector2(_boxCollider.offset.x * _localScale.x, _boxCollider.offset.y * _localScale.y);
+    private void CalculateBoxOrigins(Vector3 deltaMovement) { //IMPORTANT: Look into other properties of BoxCollider2D to find a better way to represent this in generic terms.
+        //var size = new Vector2(_boxCollider.size.x * Mathf.Abs(_localScale.x), _boxCollider.size.y * Mathf.Abs(_localScale.y));
+        //var center = new Vector2(_boxCollider.offset.x * _localScale.x, _boxCollider.offset.y * _localScale.y);
 
+        /*
         // These 3 vectors contain the origin points needed.
         _boxcastLeft = positionLastFrame + new Vector3(BoxThickness /2f, center.y);
         _boxcastRight = positionLastFrame + new Vector3(size.x - BoxThickness /2f, center.y);
         _boxcastUp = positionLastFrame + new Vector3(center.x, center.y + size.y - BoxThickness /2f);
         _boxcastDown = positionLastFrame + new Vector3(center.x, center.y - size.y + BoxThickness /2f);
+        */
+
+        // Experimental code to replace the above code. It seems more generic (It doesn't rely on the Transform having a pivot point around a certain area)
+        _boxcastLeft = _boxCollider.bounds.center - new Vector3(_boxCollider.bounds.extents.x, 0f) - deltaMovement;
+        _boxcastRight = _boxCollider.bounds.center + new Vector3(_boxCollider.bounds.extents.x, 0f) - deltaMovement;
+        _boxcastUp = _boxCollider.bounds.center + new Vector3(0f, _boxCollider.bounds.extents.y) - deltaMovement;
+        _boxcastDown = _boxCollider.bounds.center - new Vector3(0f, _boxCollider.bounds.extents.y) - deltaMovement;
     }
 
-    /*
+    /// <summary>
+    /// Checks to see if anything needs to be pushed out of the way vertically. (Only handles downward movement for now)
+    /// </summary>
+    /// <param name="deltaMovement">Represents the change in movement of this GameObject this frame.</param>
     private void CheckVerticalCollision(Vector2 deltaMovement) {
-        var isGoingUp = deltaMovement.y > 0;
-        var rayDistance = Mathf.Abs(deltaMovement.y) + SkinWidth;
-        var rayDirection = isGoingUp ? Vector2.up : Vector2.down;
-        var rayOrigin = isGoingUp ? _raycastTopLeft : _raycastBottomLeft;
+        var boxDistance = Mathf.Abs(deltaMovement.y);
+        var boxDimensions = new Vector2(_boxCollider.size.x * Mathf.Abs(_localScale.y) - .05f, BoxThickness);
 
-        rayOrigin.x += deltaMovement.x;
-        var standingOnDistance = float.MaxValue;
-        for (var i = 0; i < TotalVerticalRays; i++) {
-            var rayVector = new Vector2(rayOrigin.x + (i * _horizontalDistanceBetweenRays), rayOrigin.y);
-            Debug.DrawRay(rayVector, rayDirection * rayDistance, Color.blue);
+        var boxCastHit = Physics2D.BoxCastAll(_boxcastDown, boxDimensions, 0f, Vector2.down, boxDistance);
+        Debug.DrawLine(_boxcastDown, _boxcastUp, Color.red); // Just shows where the _boxcastDown and _boxcastUp points are
 
-            var raycastHit = Physics2D.Raycast(rayVector, rayDirection, rayDistance);
-            if (!raycastHit)
-                continue;
+        if (boxCastHit.Length == 0)
+            return;
 
-            if (!isGoingUp) {
-                var verticalDistanceToHit = _transform.position.y - raycastHit.point.y;
-                if (verticalDistanceToHit < standingOnDistance) {
-                    standingOnDistance = verticalDistanceToHit;
-
-                }
+        foreach (var hit in boxCastHit) {
+            var pushable = (IPushable)hit.collider.GetComponent(typeof(IPushable));
+            if (pushable != null) {
+                var amountToPush = _boxcastDown.y + deltaMovement.y - hit.point.y - BoxThickness / 2f;
+                pushable.PushVertical(amountToPush / Time.deltaTime);
             }
-
-            deltaMovement.y = raycastHit.point.y - rayVector.y;
-            rayDistance = Mathf.Abs(deltaMovement.y);
-
-            if (isGoingUp)
-                deltaMovement.y -= SkinWidth;
-
-            else
-                deltaMovement.y += SkinWidth;
-
-            if (!isGoingUp && deltaMovement.y > .0001f)
-
-                if (rayDistance < SkinWidth + .0001f)
-                    break;
         }
     }
-    */
+
 
     /// <summary>
     /// Check to see if anything needs to be pushed out of the way horizontally.
@@ -116,7 +106,7 @@ public class Pusher : MonoBehaviour {
         //Debug.DrawRay(rayVector, boxDirection * boxDistance, Color.red);
         var boxCastHit = Physics2D.BoxCastAll(boxOrigin, boxDimensions, 0f, boxDirection, boxDistance);
         Debug.DrawLine(_boxcastLeft, _boxcastRight, Color.magenta);
-        Debug.DrawLine(_boxcastDown, _boxcastUp, Color.red);
+
         if (boxCastHit.Length == 0)
             return;
 
@@ -125,7 +115,7 @@ public class Pusher : MonoBehaviour {
             var pushable = (IPushable)hit.collider.GetComponent(typeof(IPushable));
             if (pushable != null) {
                 var amountToPush = boxOrigin.x + deltaMovement.x - hit.point.x;
-                amountToPush = isGoingRight ? amountToPush + BoxThickness /2f: amountToPush - BoxThickness /2f;
+                amountToPush = isGoingRight ? amountToPush + BoxThickness / 2f : amountToPush - BoxThickness / 2f;
                 pushable.PushHorizontal(amountToPush / Time.deltaTime);
             }
         }

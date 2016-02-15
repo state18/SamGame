@@ -3,7 +3,12 @@ using System.Collections;
 /// <summary>
 /// This class acts as the controller for physical movement for entities. It is essentially a replacement for the Rigidbody2D component.
 /// </summary>
-public class CharacterController2D : MonoBehaviour, IPushable { // IMPORTANT: Edge problem with moving platforms. Take a look at logic/math behind MoveVertical and MoveHorizontal.
+/// 
+
+/*
+    Things to work on: Right now if a platform moves up into an entity too fast, it will pass through it. The moving platform system needs to be merged with the pushing system somehow.
+*/
+public class CharacterController2D : MonoBehaviour, IPushable {
 
     // "Skin" is how far inside the player do the rays begin?
     private const float SkinWidth = .01f;
@@ -19,6 +24,7 @@ public class CharacterController2D : MonoBehaviour, IPushable { // IMPORTANT: Ed
 
     public ControllerState2D State { get; private set; }
     public Vector2 Velocity { get { return _velocity; } }
+    public bool IsBeingCrushed { get; private set; }
     public bool HandleCollisions { get; set; }
     // If Parameters != null, return _overrideParameters, else return DefaultParameters
     public ControllerParameters2D Parameters { get { return OverrideParameters ?? DefaultParameters; } }
@@ -121,20 +127,26 @@ public class CharacterController2D : MonoBehaviour, IPushable { // IMPORTANT: Ed
     }
 
     /// <summary>
-    /// The entity reacts to an external object pushing it.
+    /// The entity reacts to an external object pushing it horizontally.
     /// </summary>
     /// <param name="push">Direction and intensity of the push</param>
     public void PushHorizontal(float push) {
-        if (push > 0)
-            State.IsCollidingLeft = true;
-        else
-            State.IsCollidingRight = true;
-
         _pusherVelocity.x += push;
     }
 
+    /// <summary>
+    /// The entity reacts to an external object pushing it vertically.
+    /// </summary>
+    /// <param name="push">Direction and intensity of the push (Should always be negative for now)</param>
     public void PushVertical(float push) {
-        AddForce(new Vector2(0f, push));
+        if (push < 0) {
+            _pusherVelocity.y += push;
+
+            // Add a bit of a downward push to the entity's velocity to create a "bonk"-like effect.
+            // This also helps separate the entity from the platform they just collided with and avoids a slight hover.
+            AddForce(new Vector2(0f, push / 2f));
+        } else
+            Debug.Log("positive wtf");
     }
 
     public void LateUpdate() {
@@ -143,11 +155,14 @@ public class CharacterController2D : MonoBehaviour, IPushable { // IMPORTANT: Ed
         // Apply gravity.
         _velocity.y += Parameters.Gravity * Time.deltaTime;
 
+        IsBeingCrushed = false;
         State.Reset();
+
+        HandlePlatformEffects();
 
         HandlePushing(_pusherVelocity * Time.deltaTime);
 
-        HandlePlatformEffects();
+        
 
         Move(Velocity * Time.deltaTime);
     }
@@ -166,18 +181,13 @@ public class CharacterController2D : MonoBehaviour, IPushable { // IMPORTANT: Ed
 
             MoveVertically(ref deltaMovement);
 
-
-            // Handle horizontal collision with moving terrain from the right and left
-            //CorrectHorizontalPlacement(ref deltaMovement, true);
-            //CorrectHorizontalPlacement(ref deltaMovement, false);
-
-            //CorrectVerticalPlacement(ref deltaMovement);
         }
 
         // If the entity is trapped between walls, don't perform the movement.
-        if (State.IsCollidingAbove && State.IsCollidingBelow || State.IsCollidingLeft && State.IsCollidingRight)
+        if (State.IsCollidingAbove && State.IsCollidingBelow || State.IsCollidingLeft && State.IsCollidingRight) {
+            IsBeingCrushed = true;
             return;
-
+        }
         // The actual movement of the player is performed. Calculations were done prior to this point.
         _transform.Translate(deltaMovement, Space.World);
 
@@ -189,25 +199,33 @@ public class CharacterController2D : MonoBehaviour, IPushable { // IMPORTANT: Ed
 
         if (State.IsMovingUpSlope)
             _velocity.y = 0;
-
-        // Remember: Platforms utilizing the ControllerStay2D method must account for the time between frames. (Example: conveyer belt speed * Time.deltaTime)  
+ 
         if (StandingOn != null) {
             _activeGlobalPlatformPoint = transform.position;
             _activeLocalPlatformPoint = StandingOn.transform.InverseTransformPoint(transform.position);
-
-            if (_lastStandingOn != StandingOn)
-                _lastStandingOn = StandingOn;
-
-        } else if (_lastStandingOn != null) {
-            _lastStandingOn = null;
-        }
+        } 
     }
 
     private void HandlePushing(Vector2 deltaMovement) {
         CalculateRayOrigins();
         if (Mathf.Abs(deltaMovement.x) > 0) {
+            if (deltaMovement.x > 0)
+                State.IsCollidingLeft = true;
+            else
+                State.IsCollidingRight = true;
+
             MoveHorizontally(ref deltaMovement);
-            Debug.Log("being pushed");
+
+        }
+        //CalculateRayOrigins();
+        if (Mathf.Abs(deltaMovement.y) > 0) {
+            if (deltaMovement.y > 0) {
+                State.IsCollidingBelow = true;
+            } else
+                State.IsCollidingAbove = true;
+
+            MoveVertically(ref deltaMovement);
+
         }
 
         _transform.Translate(deltaMovement, Space.World);
@@ -222,11 +240,11 @@ public class CharacterController2D : MonoBehaviour, IPushable { // IMPORTANT: Ed
         if (StandingOn != null) {
             var newGlobalPlatformPoint = StandingOn.transform.TransformPoint(_activeLocalPlatformPoint);
             var moveDistance = newGlobalPlatformPoint - _activeGlobalPlatformPoint;
-            
+
             if (moveDistance != Vector3.zero) {
-                Debug.Log("on a moving platform");
+                //Debug.Log("on a moving platform");
                 if (moveDistance.x != 0f) {
-                    
+
                     var isMovingRight = moveDistance.x > 0f ? true : false;
                     // Insert vertical raycasting here
                     var rayDistance = Mathf.Abs(moveDistance.x) + SkinWidth;
@@ -264,7 +282,7 @@ public class CharacterController2D : MonoBehaviour, IPushable { // IMPORTANT: Ed
                 }
                 // Note: Here we only take upwards vertical movement into account since the entity is guaranteed to be standing on a platform.
                 if (moveDistance.y > 0f) {
-                    
+
                     var isMovingUp = moveDistance.y > 0f ? true : false;
                     // Insert horizontal raycasting here
                     var rayDistance = Mathf.Abs(moveDistance.y) + SkinWidth;
@@ -287,7 +305,7 @@ public class CharacterController2D : MonoBehaviour, IPushable { // IMPORTANT: Ed
                         if (rayDistance < SkinWidth + .0001f)
                             break;
                     }
-                    
+
                 }
                 transform.Translate(moveDistance, Space.World);
             }
@@ -309,76 +327,17 @@ public class CharacterController2D : MonoBehaviour, IPushable { // IMPORTANT: Ed
                     _lastStandingOn.SendMessage("ControllerExit2D", this, SendMessageOptions.DontRequireReceiver);
 
                 StandingOn.SendMessage("ControllerEnter2D", this, SendMessageOptions.DontRequireReceiver);
+                _lastStandingOn = StandingOn;
+
             } else if (StandingOn != null)
                 StandingOn.SendMessage("ControllerStay2D", this, SendMessageOptions.DontRequireReceiver);
 
         } else if (_lastStandingOn != null) {
             _lastStandingOn.SendMessage("ControllerExit2D", this, SendMessageOptions.DontRequireReceiver);
+            _lastStandingOn = null;
         }
     }
-    /*
-    // Adjusts the entity's movement based on moving platforms from the left and right.
-    private void CorrectHorizontalPlacement(ref Vector2 deltaMovement, bool isRight) {
-        var halfWidth = (_boxCollider.size.x * _localScale.x) / 2f;
-        var rayOrigin = isRight ? _raycastBottomRight : _raycastBottomLeft;
 
-        if (isRight)
-            rayOrigin.x -= (halfWidth - SkinWidth);
-        else
-            rayOrigin.x += (halfWidth - SkinWidth);
-
-        var rayDirection = isRight ? Vector2.right : -Vector2.right;
-        var offset = 0f;
-
-        for (int i = 1; i < TotalHorizontalRays - 1; i++) {
-            //The following line used to be ...  var rayVector = new Vector2(deltaMovement.x + rayOrigin.x, deltaMovement.y + rayOrigin.y + (i * _verticalDistanceBetweenRays));
-            // Taking out deltaMovement.x seems to have fixed the bouncing behavior against walls!
-            var rayVector = new Vector2(rayOrigin.x, rayOrigin.y + (i * _verticalDistanceBetweenRays));
-
-            var raycastHit = Physics2D.Raycast(rayVector, rayDirection, halfWidth, PlatformMask);
-
-            if (!raycastHit)
-                continue;
-
-            offset = isRight ? ((raycastHit.point.x - _transform.position.x) - halfWidth) : (halfWidth - (_transform.position.x - raycastHit.point.x));
-
-            if (isRight)
-                State.IsCollidingRight = true;
-            else if (!isRight)
-                State.IsCollidingLeft = true;
-        }
-    
-        // Performs the pushing of the player 
-        deltaMovement.x += offset;
-    }
-    */
-    /*
-    // Account for the correct vertical placement of the entity with respect to moving platforms above.
-    public void CorrectVerticalPlacement(ref Vector2 deltaMovement) {
-        var halfWidth = (_boxCollider.size.y * _localScale.y) / 2f;
-        var rayOrigin = _raycastTopLeft;
-
-        rayOrigin.y -= (halfWidth - SkinWidth);
-
-        var offset = 0f;
-
-        for (int i = 1; i < TotalVerticalRays - 1; i++) {
-
-            var rayVector = new Vector2( deltaMovement.x + rayOrigin.x + (i * _horizontalDistanceBetweenRays), rayOrigin.y);
-
-            var raycastHit = Physics2D.Raycast(rayVector, Vector2.up, halfWidth, PlatformMask);
-            //Debug.DrawRay(rayVector, Vector2.up * halfWidth, Color.red);
-            if (!raycastHit)
-                continue;
-
-            offset = raycastHit.point.y - _transform.position.y - halfWidth;
-
-            State.IsCollidingAbove = true;
-        }
-
-        deltaMovement.y += offset;
-    }
-    */
     /// <summary>
     /// Determines where the rays will be raycasted from. This is based on the entity's box collider.
     /// </summary>

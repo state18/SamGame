@@ -80,7 +80,8 @@ public class Player : MonoBehaviour, ITakeDamage {
 
     public void Update() {
 
-
+        if (_controller.IsBeingCrushed)
+            LevelManager.Instance.KillPlayer();
 
         if (!IsDead)
             HandleInput();
@@ -107,11 +108,6 @@ public class Player : MonoBehaviour, ITakeDamage {
         HandleAnimation();
     }
 
-    void LateUpdate() {
-        Debug.Log(_controller.State.ToString());
-        if ((_controller.State.IsCollidingLeft && _controller.State.IsCollidingRight) || _controller.State.IsCollidingAbove && _controller.State.IsCollidingBelow)
-            LevelManager.Instance.KillPlayer();
-    }
     /// <summary>
     /// Kills the player.
     /// </summary>
