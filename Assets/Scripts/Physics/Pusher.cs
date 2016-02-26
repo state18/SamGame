@@ -1,18 +1,24 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+//IMPORTANT: Keep an eye on this class. I died one time messing around with the pushing platforms but could not replicate it after repeated attempts.
 /// <summary>
 /// Any GameObject with this component will push entities with the IPushable interface on any of their components upon collision.
 /// </summary>
-public class Pusher : MonoBehaviour { // IMPORTANT: The math is probably not 100% correct because sometimes the player will die when walking into oncoming pusher. FIX THIS
+public class Pusher : MonoBehaviour {
 
-    private const float BoxThickness = .02f;
+    private const float SkinWidth = .01f;
+    private const float _desiredDistanceBetweenRays = .2f;
 
-    private Vector2
-        _boxcastLeft,
-        _boxcastRight,
-        _boxcastUp,
-        _boxcastDown;
+    private float TotalHorizontalRays;
+    private float TotalVerticalRays;
+    private float _horizontalDistanceBetweenRays;
+    private float _verticalDistanceBetweenRays;
+
+    private Vector3
+        _raycastTopLeft,
+        _raycastBottomRight,
+        _raycastBottomLeft;
 
     // Keeping track of the last position will tell us how much this object has moved.
     private Vector3 positionLastFrame;
@@ -27,13 +33,24 @@ public class Pusher : MonoBehaviour { // IMPORTANT: The math is probably not 100
         _localScale = transform.localScale;
         _boxCollider = GetComponent<BoxCollider2D>();
 
+        // Store the actual width of the collider taking into account any scaling distortion
+        // Then divide by the total number of vertical rays minus 1 to get the horizontal distance between rays
+        var colliderWidth = _boxCollider.size.x * Mathf.Abs(transform.localScale.x) - (2 * SkinWidth);
+        TotalVerticalRays = Mathf.CeilToInt(colliderWidth / _desiredDistanceBetweenRays + 1);
+        _horizontalDistanceBetweenRays = colliderWidth / (TotalVerticalRays - 1);
+
+        // Same algorithm as above, but this computes vertical distance between rays.
+        var colliderHeight = _boxCollider.size.y * Mathf.Abs(transform.localScale.y) - (2 * SkinWidth);
+        TotalHorizontalRays = Mathf.CeilToInt(colliderHeight / _desiredDistanceBetweenRays + 1);
+        _verticalDistanceBetweenRays = colliderHeight / (TotalHorizontalRays - 1);
+
         positionLastFrame = _transform.position;
     }
 
     void Update() {
 
-        Vector2 deltaMovement = _transform.position - positionLastFrame;
-        CalculateBoxOrigins(deltaMovement);
+        Vector3 deltaMovement = _transform.position - positionLastFrame;
+        CalculateRayOrigins(deltaMovement);
 
         if (deltaMovement.y < 0)
             CheckVerticalCollision(deltaMovement);
@@ -42,29 +59,20 @@ public class Pusher : MonoBehaviour { // IMPORTANT: The math is probably not 100
             CheckHorizontalCollision(deltaMovement);
 
         positionLastFrame = _transform.position;
+
     }
 
     /// <summary>
     /// The key points where the rays will originate are established based on the position before movement.
     /// Note: These points assume the origin of the transform is at the bottom left of the box collider!!!
     /// </summary>
-    private void CalculateBoxOrigins(Vector3 deltaMovement) { //IMPORTANT: Look into other properties of BoxCollider2D to find a better way to represent this in generic terms.
-        //var size = new Vector2(_boxCollider.size.x * Mathf.Abs(_localScale.x), _boxCollider.size.y * Mathf.Abs(_localScale.y));
-        //var center = new Vector2(_boxCollider.offset.x * _localScale.x, _boxCollider.offset.y * _localScale.y);
+    private void CalculateRayOrigins(Vector3 deltaMovement) { //IMPORTANT: Look into other properties of BoxCollider2D to find a better way to represent this in generic terms.
 
-        /*
-        // These 3 vectors contain the origin points needed.
-        _boxcastLeft = positionLastFrame + new Vector3(BoxThickness /2f, center.y);
-        _boxcastRight = positionLastFrame + new Vector3(size.x - BoxThickness /2f, center.y);
-        _boxcastUp = positionLastFrame + new Vector3(center.x, center.y + size.y - BoxThickness /2f);
-        _boxcastDown = positionLastFrame + new Vector3(center.x, center.y - size.y + BoxThickness /2f);
-        */
+        _raycastTopLeft = _boxCollider.bounds.center - deltaMovement + new Vector3(-_boxCollider.bounds.extents.x + SkinWidth, _boxCollider.bounds.extents.y - SkinWidth);
+        _raycastBottomRight = _boxCollider.bounds.center - deltaMovement + new Vector3(_boxCollider.bounds.extents.x - SkinWidth, -_boxCollider.bounds.extents.y + SkinWidth);
+        _raycastBottomLeft = _boxCollider.bounds.center - deltaMovement + new Vector3(-_boxCollider.bounds.extents.x + SkinWidth, -_boxCollider.bounds.extents.y + SkinWidth);
 
-        // Experimental code to replace the above code. It seems more generic (It doesn't rely on the Transform having a pivot point around a certain area)
-        _boxcastLeft = _boxCollider.bounds.center - new Vector3(_boxCollider.bounds.extents.x - BoxThickness/2f, 0f) - deltaMovement;
-        _boxcastRight = _boxCollider.bounds.center + new Vector3(_boxCollider.bounds.extents.x - BoxThickness/2f, 0f) - deltaMovement;
-        _boxcastUp = _boxCollider.bounds.center + new Vector3(0f, _boxCollider.bounds.extents.y - BoxThickness/2f) - deltaMovement;
-        _boxcastDown = _boxCollider.bounds.center - new Vector3(0f, _boxCollider.bounds.extents.y - BoxThickness/2f) - deltaMovement;
+
     }
 
     /// <summary>
@@ -72,24 +80,30 @@ public class Pusher : MonoBehaviour { // IMPORTANT: The math is probably not 100
     /// </summary>
     /// <param name="deltaMovement">Represents the change in movement of this GameObject this frame.</param>
     private void CheckVerticalCollision(Vector2 deltaMovement) {
-        var boxDistance = Mathf.Abs(deltaMovement.y);
-        var boxDimensions = new Vector2(_boxCollider.size.x * Mathf.Abs(_localScale.y) - .05f, BoxThickness);
+        var rayDistance = Mathf.Abs(deltaMovement.y) + SkinWidth;
 
-        var boxCastHit = Physics2D.BoxCastAll(_boxcastDown, boxDimensions, 0f, Vector2.down, boxDistance);
-        Debug.DrawLine(_boxcastDown, _boxcastUp, Color.red); // Just shows where the _boxcastDown and _boxcastUp points are
+        var objectsHit = new HashSet<GameObject>(); 
 
-        if (boxCastHit.Length == 0)
-            return;
+        for (int i = 0; i < TotalVerticalRays; i++) {
+            var rayVector = new Vector2(_raycastBottomLeft.x + (i * _horizontalDistanceBetweenRays), _raycastBottomLeft.y);
 
-        foreach (var hit in boxCastHit) {
-            var pushable = (IPushable)hit.collider.GetComponent(typeof(IPushable));
-            if (pushable != null) {
-                var amountToPush = _boxcastDown.y + deltaMovement.y - hit.point.y;
-                pushable.PushVertical(amountToPush / Time.deltaTime);
+            var rayCastHit = Physics2D.RaycastAll(rayVector, Vector2.down, rayDistance);
+            //Debug.DrawRay(rayVector, Vector2.down * rayDistance, Color.green);
+            if (rayCastHit.Length == 0)
+                return;
+
+            foreach (var hit in rayCastHit) {
+                if (!objectsHit.Contains(hit.collider.gameObject)) {
+                    var pushable = (IPushable)hit.collider.GetComponent(typeof(IPushable));
+                    if (pushable != null) {
+                        var amountToPush = _raycastBottomLeft.y + deltaMovement.y - hit.point.y - SkinWidth;
+                        pushable.PushVertical(amountToPush / Time.deltaTime);
+                        objectsHit.Add(hit.collider.gameObject);
+                    }
+                }
             }
         }
     }
-
 
     /// <summary>
     /// Check to see if anything needs to be pushed out of the way horizontally.
@@ -97,27 +111,35 @@ public class Pusher : MonoBehaviour { // IMPORTANT: The math is probably not 100
     /// <param name="deltaMovement">Represents the change in movement of this GameObject this frame.</param>
     private void CheckHorizontalCollision(Vector2 deltaMovement) {
         var isGoingRight = deltaMovement.x > 0;
-        var boxDistance = Mathf.Abs(deltaMovement.x);
-        var boxDirection = isGoingRight ? Vector2.right : -Vector2.right;
-        var boxOrigin = isGoingRight ? _boxcastRight : _boxcastLeft;
-        var boxDimensions = new Vector2(BoxThickness, _boxCollider.size.y * Mathf.Abs(_localScale.y) - .05f);   //Think of the .05f as skin from the CharacterController2D.
+        var rayDistance = Mathf.Abs(deltaMovement.x) + SkinWidth;
+        var rayDirection = isGoingRight ? Vector2.right : -Vector2.right;
+        var rayOrigin = isGoingRight ? _raycastBottomRight : _raycastBottomLeft;
 
-        //Debug.DrawRay(rayVector, boxDirection * boxDistance, Color.red);
-        var boxCastHit = Physics2D.BoxCastAll(boxOrigin, boxDimensions, 0f, boxDirection, boxDistance);
-        Debug.DrawLine(_boxcastLeft, _boxcastRight, Color.magenta);
+        // Track the hit GameObjects so they aren't pushed twice in one frame.
+        var objectsHit = new HashSet<GameObject>();
 
-        if (boxCastHit.Length == 0)
-            return;
+        for (int i = 0; i < TotalHorizontalRays; i++) {
+            var rayVector = new Vector2(rayOrigin.x, rayOrigin.y + (i * _verticalDistanceBetweenRays));
 
-        // For each object hit with a component that implements IPushable, apply the proper amount of force to simulate pushing.
-        foreach (var hit in boxCastHit) {
-            var pushable = (IPushable)hit.collider.GetComponent(typeof(IPushable));
-            if (pushable != null) {
-                var amountToPush = boxOrigin.x + deltaMovement.x - hit.point.x;
-                Debug.Log(hit.point);
-                //amountToPush = isGoingRight ? amountToPush + BoxThickness : amountToPush - BoxThickness;
-                Debug.Log(amountToPush);
-                pushable.PushHorizontal(amountToPush / Time.deltaTime);
+            var rayCastHit = Physics2D.RaycastAll(rayVector, rayDirection, rayDistance);
+            //Debug.DrawRay(rayVector, rayDirection * rayDistance, Color.cyan);
+            if (rayCastHit.Length == 0)
+                return;
+
+
+            // For each object hit with a component that implements IPushable, apply the proper amount of force to simulate pushing.
+            foreach (var hit in rayCastHit) {
+                if (!objectsHit.Contains(hit.collider.gameObject)) {
+                    var pushable = (IPushable)hit.collider.GetComponent(typeof(IPushable));
+                    if (pushable != null) {
+                        var amountToPush = rayOrigin.x + deltaMovement.x - hit.point.x;
+                        // Multiplying skin width by 2 is just to push the entity a little bit more than needed so there is no getting trapped inside.
+                        amountToPush = isGoingRight ? amountToPush + SkinWidth : amountToPush - SkinWidth;
+                        Debug.Log(amountToPush);
+                        pushable.PushHorizontal(amountToPush / Time.deltaTime);
+                        objectsHit.Add(hit.collider.gameObject);
+                    }
+                }
             }
         }
 

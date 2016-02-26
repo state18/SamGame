@@ -1,15 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+// TODO: Come back and reevaluate soon.
 public class CameraController : MonoBehaviour  //This script controls the camera movement and will not allow it to go out of bounds. It will follow the player most of the time.
 {
     public Transform Player;                    //reference to the player
 
     public Transform MoveWithCamera;       //background to stay with camera
 
-    public Vector2                              //margin for player to walk in without camera movement
-        Margin,
-        Smoothing;                              //how fast will the camera move to catch up?
+    public Vector2 Smoothing;                              //how fast will the camera move to catch up?
 
     public BoxCollider2D Bounds;                //marks the bounds of the level
 
@@ -37,12 +36,11 @@ public class CameraController : MonoBehaviour  //This script controls the camera
         var y = transform.position.y;
 
         if (IsFollowing) {
+            // Move towards the player's position. Note: This used to only happen if the player stepped outside of the margins for leeway. That did not cooperate with very slow
+            // movement so it has been removed. 
+            x = Mathf.Lerp(x, Player.position.x, Smoothing.x * Time.deltaTime);
 
-            if (Mathf.Abs(x - Player.position.x) > Margin.x)                                //if the player strays too far away from margin, camera moves to the player
-                x = Mathf.Lerp(x, Player.position.x, Smoothing.x * Time.deltaTime);
-
-            if (Mathf.Abs(y - Player.position.y) > Margin.y)
-                y = Mathf.Lerp(y, Player.position.y, Smoothing.y * Time.deltaTime);
+            y = Mathf.Lerp(y, Player.position.y, Smoothing.y * Time.deltaTime);
 
         }
 

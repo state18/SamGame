@@ -23,6 +23,8 @@ public class FlyingBot : Enemy {
 
     //SlamDownwards editable fields
     public LayerMask whatisGround;
+    [SerializeField]
+    private float slamRaycastDistance;
 
     StateMachine brain;
 
@@ -188,8 +190,13 @@ public class FlyingBot : Enemy {
         SpriteRenderer botSprite = GetComponent<SpriteRenderer>();
         botAnim.speed = 2;
         botSprite.color = Color.red;
-        RaycastHit2D hit = Physics2D.Raycast(new Vector2(transform.position.x, transform.position.y), Vector2.down, 10f, whatisGround);      //stores info about the ground hit by raycasting
-        Vector3 distanceWithOffset = new Vector3(0f, myCollider.size.y / 2, 0f) + new Vector3(hit.point.x, hit.point.y, 0f);                                                                        //this offsets the ray to the bottom of the bot
+
+        // IMPORTANT: Bug: Cast multiple rays for more accurate hit detection.
+        RaycastHit2D hit = Physics2D.Raycast(new Vector2(transform.position.x, transform.position.y), Vector2.down, slamRaycastDistance, whatisGround);
+
+        // If no ground is hit, the Flying bot will still slam but for a limited distance. (the length of the raycast)
+        Vector3 distanceWithOffset = hit ? new Vector3(0f, myCollider.size.y / 2, 0f) + new Vector3(hit.point.x, hit.point.y, 0f): transform.position + new Vector3(0f, -slamRaycastDistance, 0f);
+
         //float distanceToSlam = hit.distance - distanceOffset;
         //Debug.Log("Distance to slam: " + distanceToSlam);
 
@@ -209,10 +216,8 @@ public class FlyingBot : Enemy {
 
             float step = Speed * 1.5f;
 
-            if (hit.collider != null) {
                 //Debug.Log("Moving towards hit object!");
                 transform.position = Vector2.MoveTowards(transform.position, distanceWithOffset, step * Time.deltaTime);
-            }
 
             var distanceSquared = (transform.position - distanceWithOffset).sqrMagnitude;
 

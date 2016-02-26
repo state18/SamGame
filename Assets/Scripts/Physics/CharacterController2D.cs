@@ -131,7 +131,7 @@ public class CharacterController2D : MonoBehaviour, IPushable {
     /// </summary>
     /// <param name="push">Direction and intensity of the push</param>
     public void PushHorizontal(float push) {
-        _pusherVelocity.x += push;
+        _pusherVelocity.x = push;
     }
 
     /// <summary>
@@ -140,13 +140,13 @@ public class CharacterController2D : MonoBehaviour, IPushable {
     /// <param name="push">Direction and intensity of the push (Should always be negative for now)</param>
     public void PushVertical(float push) {
         if (push < 0) {
-            _pusherVelocity.y += push;
+            _pusherVelocity.y = push;
 
             // Add a bit of a downward push to the entity's velocity to create a "bonk"-like effect.
-            // This also helps separate the entity from the platform they just collided with and avoids a slight hover.
+            // This also helps separate the entity from the platform they just collided with and avoids a hovering effect.
             AddForce(new Vector2(0f, push / 2f));
         } else
-            Debug.Log("positive wtf");
+            Debug.Log("Pushing vertically by a positive number. This should never happen.");
     }
 
     public void LateUpdate() {
@@ -342,7 +342,7 @@ public class CharacterController2D : MonoBehaviour, IPushable {
     /// Determines where the rays will be raycasted from. This is based on the entity's box collider.
     /// </summary>
     private void CalculateRayOrigins() {
-        var size = new Vector2(_boxCollider.size.x * Mathf.Abs(_localScale.x), _boxCollider.size.y * Mathf.Abs(_localScale.y)) / 2;
+        var size = new Vector2(_boxCollider.size.x * Mathf.Abs(_localScale.x), _boxCollider.size.y * Mathf.Abs(_localScale.y)) / 2f;
         var center = new Vector2(_boxCollider.offset.x * _localScale.x, _boxCollider.offset.y * _localScale.y);
 
         // These 3 vectors contain the origin points needed.
