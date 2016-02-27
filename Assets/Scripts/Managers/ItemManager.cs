@@ -27,11 +27,6 @@ public class ItemManager : MonoBehaviour {
     public static int currentIndex;
     public static int itemsObtained;   //number of items obtained
 
-    //PlayerController pc;
-
-    void Awake() {
-        DontDestroyOnLoad(gameObject);
-    }
     // Use this for initialization
     void Start() {
 

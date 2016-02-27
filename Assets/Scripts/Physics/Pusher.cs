@@ -71,8 +71,6 @@ public class Pusher : MonoBehaviour {
         _raycastTopLeft = _boxCollider.bounds.center - deltaMovement + new Vector3(-_boxCollider.bounds.extents.x + SkinWidth, _boxCollider.bounds.extents.y - SkinWidth);
         _raycastBottomRight = _boxCollider.bounds.center - deltaMovement + new Vector3(_boxCollider.bounds.extents.x - SkinWidth, -_boxCollider.bounds.extents.y + SkinWidth);
         _raycastBottomLeft = _boxCollider.bounds.center - deltaMovement + new Vector3(-_boxCollider.bounds.extents.x + SkinWidth, -_boxCollider.bounds.extents.y + SkinWidth);
-
-
     }
 
     /// <summary>
@@ -96,7 +94,7 @@ public class Pusher : MonoBehaviour {
                 if (!objectsHit.Contains(hit.collider.gameObject)) {
                     var pushable = (IPushable)hit.collider.GetComponent(typeof(IPushable));
                     if (pushable != null) {
-                        var amountToPush = _raycastBottomLeft.y + deltaMovement.y - hit.point.y - SkinWidth;
+                        var amountToPush = rayVector.y + deltaMovement.y - hit.point.y - SkinWidth;
                         pushable.PushVertical(amountToPush / Time.deltaTime);
                         objectsHit.Add(hit.collider.gameObject);
                     }
@@ -132,8 +130,7 @@ public class Pusher : MonoBehaviour {
                 if (!objectsHit.Contains(hit.collider.gameObject)) {
                     var pushable = (IPushable)hit.collider.GetComponent(typeof(IPushable));
                     if (pushable != null) {
-                        var amountToPush = rayOrigin.x + deltaMovement.x - hit.point.x;
-                        // Multiplying skin width by 2 is just to push the entity a little bit more than needed so there is no getting trapped inside.
+                        var amountToPush = rayVector.x + deltaMovement.x - hit.point.x;
                         amountToPush = isGoingRight ? amountToPush + SkinWidth : amountToPush - SkinWidth;
                         Debug.Log(amountToPush);
                         pushable.PushHorizontal(amountToPush / Time.deltaTime);

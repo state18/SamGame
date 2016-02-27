@@ -131,6 +131,9 @@ public class CharacterController2D : MonoBehaviour, IPushable {
     /// </summary>
     /// <param name="push">Direction and intensity of the push</param>
     public void PushHorizontal(float push) {
+        // Remember: If the object doing the pushing has exceeded past the opposite side of this entity's collider, they will die from colliding on both sides.
+        // Either fix this or design around it. There probably shouldn't be objects moving that fast anyway, but a fix would be designing a MoveHorizontal method just for
+        // pushing where it ignores walls.
         _pusherVelocity.x = push;
     }
 
@@ -381,7 +384,7 @@ public class CharacterController2D : MonoBehaviour, IPushable {
                 State.IsCollidingLeft = true;
             }
 
-            if (rayDistance < SkinWidth + 0f) //was .0001f
+            if (rayDistance < SkinWidth) //was + .0001f
                 break;
         }
     }
