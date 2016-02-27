@@ -38,13 +38,9 @@ public class PistolItem : Item
 	{
 		if (cooldown > 0)
 			cooldown -= Time.deltaTime;
-        // TODO Handle interaction with climbing.
-		if (InHand && Input.GetKeyDown (KeyCode.X)) {
-			Use ();
-		}
 	}
 
-	public void Use ()
+	public override void Use ()
 	{
 		if (cooldown <= 0) {
 			GetComponent<AudioSource> ().Play ();

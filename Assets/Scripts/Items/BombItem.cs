@@ -24,17 +24,13 @@ public class BombItem : Item
 	// Update is called once per frame
 	void Update ()
 	{
-		if (InHand && Input.GetKeyDown (KeyCode.X)) {
-			Use ();
-		}
+
 	}
 	
-	public  void Use ()
+	public override void Use ()
 	{
-		if (ongoingBombs < 2) {
-
+		if (ongoingBombs < 2) 
 			StartCoroutine ("UseCo");
-		}
 	}
 
 	public IEnumerator UseCo ()

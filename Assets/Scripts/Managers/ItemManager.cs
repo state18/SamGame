@@ -30,7 +30,7 @@ public class ItemManager : MonoBehaviour {
     // Use this for initialization
     void Start() {
 
-        // Hard code the following as more items are added to the game.
+        // Hard code the following as more items are added to the game. This structure will never change throughout the game.
 
         items = new GameObject[size];
         activeItemHUD = new Image[size];
@@ -67,6 +67,8 @@ public class ItemManager : MonoBehaviour {
             Cycle(1);
         }
 
+        if (Input.GetButtonDown("Use"))
+            items[currentIndex].GetComponent<Item>().Use();
 
     }
 

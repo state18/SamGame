@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Sword : Item {
+public class SwordItem : Item {
 
     public Transform handStart;
     public Transform handFinish;
@@ -13,10 +13,8 @@ public class Sword : Item {
     private float cooldown = 0f;
     public float cooldownTime;
     public float enemyKnockback;
-    //private int rayAmount = 6;
     private int ongoingPunches = 0;
     public int damageToGive;
-    //public float radius;
     public Vector2 boxSize;
     public int hitDirection;
 
@@ -33,14 +31,9 @@ public class Sword : Item {
     void Update() {
         if (cooldown > 0)
             cooldown -= Time.deltaTime;
-
-        // Remember to handle climbing state!!
-        if (InHand && Input.GetKeyDown(KeyCode.X)) {
-            Use();
-        }
     }
 
-    public void Use() {
+    public override void Use() {
         if (cooldown <= 0) {
             GetComponent<AudioSource>().Play();
             StartCoroutine("UseCo");
@@ -49,26 +42,17 @@ public class Sword : Item {
     }
     public IEnumerator UseCo() {
         RaycastHit2D[] hit;
-        //bool hitSomething = false;
         cooldown = cooldownTime;
         ongoingPunches++;
         playerAnim.SetBool("isPunching", true);
 
         float adjustedDistance = (Mathf.Abs(player.Velocity.x) > 0) ? distance + .33f : distance;
-
-        //Debug.Log (adjustedDistance);
-
-
         Vector2 origin = Vector2.Lerp(new Vector2(handStart.position.x, handStart.position.y), new Vector2(handFinish.position.x, handFinish.position.y), .5f);
 
         if (handStart.parent.transform.localScale.x > 0) {
 
-
             hit = Physics2D.BoxCastAll(origin, boxSize, 0f, Vector2.right, adjustedDistance, punchable);
-
             hitDirection = 1;
-
-
 
         } else {
 
