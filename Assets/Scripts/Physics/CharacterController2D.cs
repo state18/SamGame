@@ -23,7 +23,7 @@ public class CharacterController2D : MonoBehaviour, IPushable {
     public ControllerParameters2D DefaultParameters;
 
     public ControllerState2D State { get; private set; }
-    public Vector2 Velocity { get { return _velocity; } }
+    public Vector2 Velocity { get { return _actualVelocity; } }
     public bool IsBeingCrushed { get; private set; }
     public bool HandleCollisions { get; set; }
     // If Parameters != null, return _overrideParameters, else return DefaultParameters
@@ -31,6 +31,9 @@ public class CharacterController2D : MonoBehaviour, IPushable {
     public ControllerParameters2D OverrideParameters { get; set; }
     public GameObject StandingOn { get; private set; }
     public Vector3 PlatformVelocity { get; private set; }
+
+    public bool resetVelocityEachFrame = false;
+
     public bool CanJump
     {
         get
@@ -46,6 +49,8 @@ public class CharacterController2D : MonoBehaviour, IPushable {
     }
 
     private Vector2 _velocity;
+    // When an outside class asks for the velocity of this CharacterController2D, give them this.
+    private Vector2 _actualVelocity;
     private Vector2 _pusherVelocity;
     private Transform _transform;
     private Vector3 _localScale;
@@ -165,9 +170,7 @@ public class CharacterController2D : MonoBehaviour, IPushable {
 
         HandlePushing(_pusherVelocity * Time.deltaTime);
 
-        
-
-        Move(Velocity * Time.deltaTime);
+        Move(_velocity * Time.deltaTime);
     }
 
     private void Move(Vector2 deltaMovement) {
@@ -197,12 +200,17 @@ public class CharacterController2D : MonoBehaviour, IPushable {
         if (Time.deltaTime > 0)
             _velocity = deltaMovement / Time.deltaTime;
 
-        _velocity.x = Mathf.Min(_velocity.x, Parameters.MaxVelocity.x);
-        _velocity.y = Mathf.Min(_velocity.y, Parameters.MaxVelocity.y);
+        _actualVelocity.x = Mathf.Min(_velocity.x, Parameters.MaxVelocity.x);
+        _actualVelocity.y = Mathf.Min(_velocity.y, Parameters.MaxVelocity.y);
 
+        // If the velocity is not to be preserved to the next frame, reset the x component. (y component is still needed for gravity.)
+        _velocity = resetVelocityEachFrame ? new Vector2(0f, _actualVelocity.y) : _actualVelocity;
+
+ 
         if (State.IsMovingUpSlope)
             _velocity.y = 0;
  
+        
         if (StandingOn != null) {
             _activeGlobalPlatformPoint = transform.position;
             _activeLocalPlatformPoint = StandingOn.transform.InverseTransformPoint(transform.position);
