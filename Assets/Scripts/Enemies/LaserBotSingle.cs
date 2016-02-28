@@ -23,7 +23,7 @@ public class LaserBotSingle : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
-		playerPosition = GameObject.FindGameObjectWithTag ("Player").transform;
+		playerPosition = FindObjectOfType<Player>().transform;
 		defaultRotation = transform.rotation;
 		fireSound = GetComponent<AudioSource> ();
 

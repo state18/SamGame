@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class FireWizard : MonoBehaviour, ITakeDamage, IRespawnable{
+public class FireWizard : Enemy{
     
 
     void Start() {
@@ -10,13 +10,5 @@ public class FireWizard : MonoBehaviour, ITakeDamage, IRespawnable{
 
     void Update() {
 
-    }
-
-    public void RespawnMe() {
-        throw new NotImplementedException();
-    }
-
-    public void TakeDamage(int damage, GameObject instigator) {
-        throw new NotImplementedException();
     }
 }
