@@ -139,6 +139,7 @@ public class Player : MonoBehaviour, ITakeDamage {
     /// </summary>
     public void Kill() {
         CancelInvoke("SpriteToggle");
+        StopAllCoroutines();
         _controller.HandleCollisions = false;
         GetComponent<Collider2D>().enabled = false;
         if (ExitAllTriggers != null)
@@ -150,6 +151,8 @@ public class Player : MonoBehaviour, ITakeDamage {
             hearts[i].isOn = false;
         }
         GetComponent<SpriteRenderer>().enabled = false;
+
+        knockbackActive = false;
     }
 
     /// <summary>
