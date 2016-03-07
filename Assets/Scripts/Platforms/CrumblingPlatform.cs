@@ -32,13 +32,13 @@ public class CrumblingPlatform : MonoBehaviour {
 
         //  Start crumbling animation here.
         isCrumbling = true;
-        yield return StartCoroutine(CoroutineBridge.instance.Wait(crumbleIn));
+        yield return new WaitForSeconds(crumbleIn);
         edgeCollider.enabled = false;
         for (int i = 0; i < sr.Length; i++) {
             sr[i].enabled = false;
         }
 
-        yield return StartCoroutine(CoroutineBridge.instance.Wait(comeBackIn));
+        yield return new WaitForSeconds(comeBackIn);
 
         edgeCollider.enabled = true;
         for (int i = 0; i < sr.Length; i++) {

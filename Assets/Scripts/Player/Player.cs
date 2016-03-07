@@ -9,6 +9,7 @@ using System;
 /// </summary>
 public class Player : MonoBehaviour, ITakeDamage {
 
+    // References to components.
     private CharacterController2D _controller;
     private Animator _animator;
     private SpriteRenderer playerSprite;
@@ -22,11 +23,13 @@ public class Player : MonoBehaviour, ITakeDamage {
     // How quickly can the player's velocity change?
     public float SpeedAccelerationOnGround = 10f;
     public float SpeedAccelerationInAir = 5f;
+    [SerializeField]
+    private Vector2 knockbackMagnitudes;
     public bool IsFacingRight { get; private set; }
     // Is the user trying to move the character?
     public bool IsKeyboardInput { get; set; }
     public int MaxHealth = 3;
-    public AudioSource ouchEffect;          // On damage effect
+
     public Projectile Projectile;            // TODO merge this with current projectile system.
     public float FireRate;
     public int invulnerabilityCap;
@@ -37,16 +40,25 @@ public class Player : MonoBehaviour, ITakeDamage {
     public bool IsDead { get; private set; }
     public Toggle[] hearts;
     public bool IsInvulnerable { get; private set; }
+    public AudioSource ouchEffect;          // On damage effect
+
+    // Status information
+    private bool knockbackActive = false;
 
     // State information specific to the player. This code is here instead of CharacterController since as of right now, climbing is restricted to being
     // something only the player can do.
+
+
+    // Tracks how many ladder colliders the player is inside of. This is necessary for adjacent ladders to function properly.
+    public int LadderColliderCount { get; set; }
+
+    // Will hold all of the OnTriggerExit2D methods of the colliders the player is currently in. (This is so they get called even when the player is disabled upon death.)
+    public Action<Collider2D> ExitAllTriggers;
+
+    // Climbing fields/properties
     public ControllerParameters2D climbingParameters;
     public bool CanClimb { get; set; }
     private bool isClimbing;
-    // Tracks how many ladder colliders the player is inside of. This is necessary for adjacent ladders to function properly.
-    public int LadderColliderCount { get; set; }
-    // Will hold all of the OnTriggerExit2D methods of the colliders the player is currently in. (This is so they get called even when the player is disabled upon death.)
-    public Action<Collider2D> ExitAllTriggers;
 
     public bool IsClimbing
     {
@@ -83,6 +95,14 @@ public class Player : MonoBehaviour, ITakeDamage {
         FullHealth();
     }
 
+    // IMPORTANT: Rework knockback system.
+    // 1. GiveDamageToPlayer class should call a KnockBack method on the Player class if knockback is enabled (not implemented yet).
+    // 2. Knockback will now be a new state where the player cannot through keyboard input. It will last a certain amount of time before removing the effect.
+    // 3. Vertical movement will still be normal to simulate gravity, but horizontal movement will be controlled by the knockback code.
+    // 4. The player should be invulernable during the knockback and for a short period after. This is to avoid being chain hit by enemies.
+    // 5. The knockback is meant to be a punishment for being hit. Not allowing movement during a knockback creates an even bigger danger when near a pit.
+    // Also: This class is getting complicated and convoluted in the Update function. Possibly use the StateMachine class and turn pieces of the Update code into states.
+
     public void Update() {
 
         if (_controller.IsBeingCrushed)
@@ -91,19 +111,20 @@ public class Player : MonoBehaviour, ITakeDamage {
         if (!IsDead)
             HandleInput();
 
-        var movementFactor = _controller.State.IsGrounded ? SpeedAccelerationOnGround : SpeedAccelerationInAir;
+        // var movementFactor = _controller.State.IsGrounded ? SpeedAccelerationOnGround : SpeedAccelerationInAir;
 
         // Horizontal force to be added is determined by interpolating current velocity and the desired direction times the max speed.
         // Movement factor determines distance per frame based on location ie ground, air, water, etc...
-        if (IsDead)
+        if (IsDead) {
             _controller.SetHorizontalForce(0);
-        else if (IsClimbing) {
+
+        } else if (IsClimbing) {
 
             _controller.SetForce(new Vector2(_normalizedHorizontalSpeed * MaxSpeed / 2.5f, _normalizedVerticalSpeed * MaxSpeed / 2.5f));
             // Handles the intersection of ladders with the ground
             if (_controller.State.IsCollidingBelow && _normalizedVerticalSpeed == -1)
                 IsClimbing = false;
-        } else {
+        } else if (!knockbackActive){
             _controller.SetHorizontalForce(_normalizedHorizontalSpeed * MaxSpeed);
             // Acceleration Movement: Currently disabled until a solution is found to make it behave with the rest of the physics engine.
             //_controller.SetHorizontalForce(Mathf.Lerp(_controller.Velocity.x, _normalizedHorizontalSpeed * MaxSpeed, movementFactor * Time.deltaTime));
@@ -223,20 +244,6 @@ public class Player : MonoBehaviour, ITakeDamage {
         _animator.SetBool("Ground", _controller.State.IsCollidingBelow);
 
     }
-    // TODO IMPORTANT! This shows how to properly use the new projectile system! Use this with pistol item.
-    /*
-    private void FireProjectile() {
-        if (_canFireIn > 0)
-            return;
-
-        var direction = _isFacingRight ? Vector2.right : -Vector2.right;
-
-        var projectile = (Projectile)Instantiate(Projectile, ProjectileFireLocation.position, ProjectileFireLocation.rotation);
-        projectile.Initialize(gameObject, direction, _controller.Velocity);
-
-        _canFireIn = FireRate;
-    }
-    */
 
     // Flips the player over the y axis by negating the current x property of local scale
     private void Flip() {
@@ -244,6 +251,37 @@ public class Player : MonoBehaviour, ITakeDamage {
         IsFacingRight = transform.localScale.x > 0;
     }
 
+    public void Knockback(Vector2 instigatorPosition) {
+        if (!knockbackActive) {
+            knockbackActive = true;
+            IsClimbing = false;
+            StartCoroutine(KnockbackCo(instigatorPosition));
+        }
+    }
+
+    private IEnumerator KnockbackCo(Vector2 instigatorPosition) {
+
+        Vector2 knockbackForce;
+
+        knockbackForce.x = instigatorPosition.x > transform.position.x ? -knockbackMagnitudes.x : knockbackMagnitudes.x;
+
+        if (_controller.State.IsCollidingBelow)
+            knockbackForce.y = knockbackMagnitudes.y;
+        else
+            knockbackForce.y = instigatorPosition.y > transform.position.y ? -knockbackMagnitudes.y : knockbackMagnitudes.y;
+
+        _controller.SetForce(knockbackForce);
+
+        // Skip a frame so the player can actually move from the ground.
+        yield return null;
+
+        while (!_controller.State.IsCollidingBelow) {
+            yield return null;
+        }
+
+        //Debug.Log("knockback ended");
+        knockbackActive = false;
+    }
     public void BuffInvulnerability() {
         StartCoroutine("BuffInvulnerabilityCo");
     }
@@ -257,6 +295,10 @@ public class Player : MonoBehaviour, ITakeDamage {
         IsInvulnerable = true;
         InvokeRepeating("SpriteToggle", 0f, .1f);
 
+        while (knockbackActive) {
+            Debug.Log("knockback is still active.");
+            yield return null;
+        }
         yield return new WaitForSeconds(invulnerabilityCap);
         IsInvulnerable = false;
         CancelInvoke("SpriteToggle");

@@ -6,7 +6,7 @@ public class CameraController : MonoBehaviour  //This script controls the camera
 {
     public Transform Player;                    //reference to the player
 
-    public Transform MoveWithCamera;       //background to stay with camera
+    public Transform background;       //background to stay with camera
 
     public Vector2 Smoothing;                              //how fast will the camera move to catch up?
 
@@ -54,8 +54,8 @@ public class CameraController : MonoBehaviour  //This script controls the camera
 
         DeltaMovement = new Vector2(transform.position.x - lastPosition.x, transform.position.y - lastPosition.y);
 
-        if (MoveWithCamera != null) {
-            MoveWithCamera.position = new Vector3(transform.position.x, transform.position.y, MoveWithCamera.position.z);
+        if (background != null) {
+            background.position = new Vector3(transform.position.x, transform.position.y, background.position.z);
         }
         //keeps camera from leaving bounds by adding above values
     }

@@ -20,10 +20,6 @@ public class ActiveBomb : MonoBehaviour {
     void Update() {
         lifetime -= Time.deltaTime;
 
-        // This is for consistency when interacting with platforms the same way the player does. The player's force is set each frame based on input and current speed, and then platforms are taken into consideration.
-        // For the bomb, no input is given and therefore the speed should be lerped between current speed and 0 with step distance being equal to the acceleration * time between frames.
-        //controller.SetHorizontalForce(Mathf.Lerp(controller.Velocity.x, 0f, SpeedAcceleration * Time.deltaTime));
-
         if (lifetime < 0) {
             Instantiate(detonationParticle, transform.position, transform.rotation);
             // Every Collider2D within the blast radius will be captured in this array

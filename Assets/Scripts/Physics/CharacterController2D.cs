@@ -32,7 +32,7 @@ public class CharacterController2D : MonoBehaviour, IPushable {
     public GameObject StandingOn { get; private set; }
     public Vector3 PlatformVelocity { get; private set; }
 
-    public bool resetVelocityEachFrame = false;
+    public bool resetHorizontalVelocityEachFrame = false;
 
     public bool CanJump
     {
@@ -174,8 +174,6 @@ public class CharacterController2D : MonoBehaviour, IPushable {
     }
 
     private void Move(Vector2 deltaMovement) {
-        //var wasGrounded = State.IsCollidingBelow;
-        //State.Reset();
 
         if (HandleCollisions) {
 
@@ -204,7 +202,7 @@ public class CharacterController2D : MonoBehaviour, IPushable {
         _actualVelocity.y = Mathf.Min(_velocity.y, Parameters.MaxVelocity.y);
 
         // If the velocity is not to be preserved to the next frame, reset the x component. (y component is still needed for gravity.)
-        _velocity = resetVelocityEachFrame ? new Vector2(0f, _actualVelocity.y) : _actualVelocity;
+        _velocity = resetHorizontalVelocityEachFrame ? new Vector2(0f, _actualVelocity.y) : _actualVelocity;
 
  
         if (State.IsMovingUpSlope)

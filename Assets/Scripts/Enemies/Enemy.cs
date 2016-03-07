@@ -7,7 +7,6 @@ using UnityEngine;
 public abstract class Enemy : MonoBehaviour, ITakeDamage, IRespawnable {
 
     public float Speed;
-    //public Projectile Projectile;
     public GameObject DestroyedEffect;
     public float MaxHealth;
     public float Health { get; protected set; }
