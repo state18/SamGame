@@ -250,6 +250,7 @@ public class Player : MonoBehaviour, ITakeDamage {
 
 
         _animator.SetBool("Ground", _controller.State.IsCollidingBelow);
+        _animator.SetBool("isHurt", knockbackActive);
 
     }
 
