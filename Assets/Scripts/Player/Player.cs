@@ -124,7 +124,7 @@ public class Player : MonoBehaviour, ITakeDamage {
             // Handles the intersection of ladders with the ground
             if (_controller.State.IsCollidingBelow && _normalizedVerticalSpeed == -1)
                 IsClimbing = false;
-        } else if (!knockbackActive){
+        } else if (!knockbackActive) {
             _controller.SetHorizontalForce(_normalizedHorizontalSpeed * MaxSpeed);
             // Acceleration Movement: Currently disabled until a solution is found to make it behave with the rest of the physics engine.
             //_controller.SetHorizontalForce(Mathf.Lerp(_controller.Velocity.x, _normalizedHorizontalSpeed * MaxSpeed, movementFactor * Time.deltaTime));
@@ -153,6 +153,7 @@ public class Player : MonoBehaviour, ITakeDamage {
         GetComponent<SpriteRenderer>().enabled = false;
 
         knockbackActive = false;
+        IsInvulnerable = false;
     }
 
     /// <summary>
@@ -193,11 +194,7 @@ public class Player : MonoBehaviour, ITakeDamage {
                 LevelManager.Instance.KillPlayer();
             else
                 BuffInvulnerability();
-
-
         }
-
-
     }
 
     public void FullHealth() {
@@ -230,6 +227,14 @@ public class Player : MonoBehaviour, ITakeDamage {
 
         if (Input.GetButtonDown("Respawn"))
             LevelManager.Instance.KillPlayer();
+
+        // This is simply for convenience while testing the game in the editor.
+        #if UNITY_EDITOR
+            if (Input.GetKeyDown("t") && !IsDead)
+                FullHealth();
+        #endif
+
+
     }
 
     private void HandleAnimation() {
@@ -254,6 +259,10 @@ public class Player : MonoBehaviour, ITakeDamage {
         IsFacingRight = transform.localScale.x > 0;
     }
 
+    /// <summary>
+    /// Initiates the coroutine responsible for knocking the player away from a point
+    /// </summary>
+    /// <param name="instigatorPosition">Location of the entity knocking the player back</param>
     public void Knockback(Vector2 instigatorPosition) {
         if (!knockbackActive) {
             knockbackActive = true;
@@ -262,14 +271,22 @@ public class Player : MonoBehaviour, ITakeDamage {
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="instigatorPosition"></param>
+    /// <returns></returns>
     private IEnumerator KnockbackCo(Vector2 instigatorPosition) {
 
         Vector2 knockbackForce;
 
+        // The player should be knocked away horizontally from whatever is knocking it back.
         knockbackForce.x = instigatorPosition.x > transform.position.x ? -knockbackMagnitudes.x : knockbackMagnitudes.x;
 
+        // If standing on the ground, always apply an upwards knockback.
         if (_controller.State.IsCollidingBelow)
             knockbackForce.y = knockbackMagnitudes.y;
+        // Otherwise knock the player in the opposite vertical direction of the instigator.
         else
             knockbackForce.y = instigatorPosition.y > transform.position.y ? -knockbackMagnitudes.y : knockbackMagnitudes.y;
 
