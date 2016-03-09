@@ -23,7 +23,8 @@ public class Checkpoint : MonoBehaviour
 
 		if (other.GetComponent<Player>() != null && !isActivated) {
             LevelManager.Instance.currentCheckPoint = this;
-            LevelManager.Instance.ClearDeadEnemies();
+            // Testing the game with dead enemies respawning independent of checkpoints.
+            //LevelManager.Instance.ClearDeadEnemies();
 			isActivated = true;
 			anim.SetBool ("isActivated", true);
 			GetComponent<AudioSource> ().Play ();

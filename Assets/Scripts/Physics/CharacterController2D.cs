@@ -124,8 +124,8 @@ public class CharacterController2D : MonoBehaviour, IPushable {
     /// <summary>
     /// The entity's vertical velocity is set to its jump magnitude.
     /// </summary>
-    public void Jump() {
-        if (_jumpIn <= 0) {
+    public void BasicJump() {
+        if (CanJump && _jumpIn <= 0) {
             SetVerticalForce(Parameters.JumpMagnitude);
             _jumpIn = Parameters.JumpFrequency;
         }

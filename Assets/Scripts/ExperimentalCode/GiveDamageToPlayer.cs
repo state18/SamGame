@@ -7,9 +7,7 @@ public class GiveDamageToPlayer : MonoBehaviour {
 
     public void OnTriggerStay2D(Collider2D other) {
         var player = other.GetComponent<Player>();
-        if (player == null) {
-            Debug.Log("null player");
-        }
+
         if (player == null || player.IsDead)
             return;
 

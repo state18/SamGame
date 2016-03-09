@@ -7,6 +7,7 @@ public class JumpingGoblin : Enemy {
 
 	// Use this for initialization
 	void Start () {
+        base.Initialize();
         controller = GetComponent<CharacterController2D>();
         direction = Vector2.right;
         startPosition = transform.position;
@@ -24,7 +25,7 @@ public class JumpingGoblin : Enemy {
                 Flip();
 
             if(controller.CanJump)
-                controller.Jump();
+                controller.BasicJump();
         }
     }
 }

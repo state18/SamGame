@@ -6,6 +6,7 @@ using System.Linq;
 
 
 public class FlyingBot : Enemy {
+
     //Patrol editable fields
 
     public PathDefinition patrolPath;       //Where will this entity patrol?
@@ -38,6 +39,7 @@ public class FlyingBot : Enemy {
 
     // Use this for initialization
     void Start() {
+        base.Initialize();
         playerTransform = FindObjectOfType<Player>().transform;
         playerController = playerTransform.GetComponent<CharacterController2D>();
 

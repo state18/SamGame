@@ -30,8 +30,6 @@ public class Player : MonoBehaviour, ITakeDamage {
     public bool IsKeyboardInput { get; set; }
     public int MaxHealth = 3;
 
-    public Projectile Projectile;            // TODO merge this with current projectile system.
-    public float FireRate;
     public int invulnerabilityCap;
     public Transform ProjectileFireLocation;
 
@@ -95,20 +93,12 @@ public class Player : MonoBehaviour, ITakeDamage {
         FullHealth();
     }
 
-    // IMPORTANT: Rework knockback system.
-    // 1. GiveDamageToPlayer class should call a KnockBack method on the Player class if knockback is enabled (not implemented yet).
-    // 2. Knockback will now be a new state where the player cannot through keyboard input. It will last a certain amount of time before removing the effect.
-    // 3. Vertical movement will still be normal to simulate gravity, but horizontal movement will be controlled by the knockback code.
-    // 4. The player should be invulernable during the knockback and for a short period after. This is to avoid being chain hit by enemies.
-    // 5. The knockback is meant to be a punishment for being hit. Not allowing movement during a knockback creates an even bigger danger when near a pit.
-    // Also: This class is getting complicated and convoluted in the Update function. Possibly use the StateMachine class and turn pieces of the Update code into states.
-
     public void Update() {
 
         if (_controller.IsBeingCrushed)
             LevelManager.Instance.KillPlayer();
 
-        if (!IsDead)
+        if (!IsDead && !knockbackActive)
             HandleInput();
 
         // var movementFactor = _controller.State.IsGrounded ? SpeedAccelerationOnGround : SpeedAccelerationInAir;
@@ -131,7 +121,9 @@ public class Player : MonoBehaviour, ITakeDamage {
         }
 
         // NOTE: 1/3/2016 had to fix issues with vsync. Removed multiplying movementFactor by Time.deltaTime and used smaller values for the acceleration on ground/air.
-        HandleAnimation();
+
+        if (!IsDead)
+            HandleAnimation();
     }
 
     /// <summary>
@@ -139,6 +131,7 @@ public class Player : MonoBehaviour, ITakeDamage {
     /// </summary>
     public void Kill() {
         CancelInvoke("SpriteToggle");
+        _animator.SetBool("isHurt", true);
         StopAllCoroutines();
         _controller.HandleCollisions = false;
         GetComponent<Collider2D>().enabled = false;
@@ -150,7 +143,7 @@ public class Player : MonoBehaviour, ITakeDamage {
         for (int i = 0; i < hearts.Length; i++) {
             hearts[i].isOn = false;
         }
-        GetComponent<SpriteRenderer>().enabled = false;
+        GetComponent<SpriteRenderer>().enabled = true;
 
         knockbackActive = false;
         IsInvulnerable = false;
@@ -217,11 +210,18 @@ public class Player : MonoBehaviour, ITakeDamage {
             if (IsFacingRight)
                 Flip();
 
+        // IMPORTANT: Rework jumping to a variable jump dependent on how long the jump key is held down.
+        //  When the Jump button is pressed and the player isn't currently jumping, start a coroutine that will execute the jumping process.
+        //  To avoid the jetpack feel:
+        //      Gravity will be turned off during the jump routine. This is because an artificial gravity-like feel is incorporated into the routine itself.
+        //      Establish a maximum jump time. When this time is reached OR if the player releases the button.
+        //      The earliest frames of the jump will be the strongest in terms of force. As the jump goes on, the force will decrease, reaching 0 at maxTime.
+        //  The jumping coroutine will exit when either the player releases the jump button or the maxTime has passed.
         if (Input.GetButtonDown("Jump")) {
 
-            if (_controller.CanJump)
-                _controller.Jump();
-            else if (IsClimbing)
+            _controller.BasicJump();
+
+            if (IsClimbing)
                 IsClimbing = false;
         }
 
@@ -229,10 +229,10 @@ public class Player : MonoBehaviour, ITakeDamage {
             LevelManager.Instance.KillPlayer();
 
         // This is simply for convenience while testing the game in the editor.
-        #if UNITY_EDITOR
-            if (Input.GetKeyDown("t") && !IsDead)
-                FullHealth();
-        #endif
+#if UNITY_EDITOR
+        if (Input.GetKeyDown("t") && !IsDead)
+            FullHealth();
+#endif
 
 
     }
