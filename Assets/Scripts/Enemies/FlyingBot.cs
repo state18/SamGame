@@ -39,7 +39,7 @@ public class FlyingBot : Enemy {
 
     // Use this for initialization
     void Start() {
-        base.Initialize();
+        Initialize();
         playerTransform = FindObjectOfType<Player>().transform;
         playerController = playerTransform.GetComponent<CharacterController2D>();
 

@@ -25,6 +25,10 @@ public class Player : MonoBehaviour, ITakeDamage {
     public float SpeedAccelerationInAir = 5f;
     [SerializeField]
     private Vector2 knockbackMagnitudes;
+    [SerializeField]
+    private float maxJumpDuration;
+    [SerializeField]
+    private ControllerParameters2D whileJumpingParameters;
     public bool IsFacingRight { get; private set; }
     // Is the user trying to move the character?
     public bool IsKeyboardInput { get; set; }
@@ -132,6 +136,7 @@ public class Player : MonoBehaviour, ITakeDamage {
     public void Kill() {
         CancelInvoke("SpriteToggle");
         _animator.SetBool("isHurt", true);
+        CancelJump();
         StopAllCoroutines();
         _controller.HandleCollisions = false;
         GetComponent<Collider2D>().enabled = false;
@@ -172,6 +177,7 @@ public class Player : MonoBehaviour, ITakeDamage {
     // TODO Make an animation that plays for a bit upon getting hit.
     public void TakeDamage(int damage, GameObject instigator) {
         if (!IsInvulnerable) {
+            CancelJump();
             ouchEffect.Play();
 
             for (int i = Health - 1; i > Health - damage - 1; i--) {
@@ -219,7 +225,8 @@ public class Player : MonoBehaviour, ITakeDamage {
         //  The jumping coroutine will exit when either the player releases the jump button or the maxTime has passed.
         if (Input.GetButtonDown("Jump")) {
 
-            _controller.BasicJump();
+            if (_controller.State.IsGrounded)
+                StartCoroutine("JumpCo");
 
             if (IsClimbing)
                 IsClimbing = false;
@@ -258,6 +265,30 @@ public class Player : MonoBehaviour, ITakeDamage {
     private void Flip() {
         transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
         IsFacingRight = transform.localScale.x > 0;
+    }
+
+    private IEnumerator JumpCo () {
+
+        // Enabling whileJumpingParameters to turn off gravity.
+        var jumpTimer = 0f;
+        _controller.OverrideParameters = whileJumpingParameters;
+
+        // Continue jumping if the button is being pressed, the jump hasn't exceeded max duration, not colliding against a ceiling, and still using whileJumpingParameters.
+        // Note: Canceling this coroutine when taking damage/dying/ occurs on a per case basis by calling the CancelJump method.
+        while (Input.GetButton("Jump") && jumpTimer < maxJumpDuration && !_controller.State.IsCollidingAbove && _controller.OverrideParameters == whileJumpingParameters) {
+            float proportionCompleted = jumpTimer / maxJumpDuration;
+            //IMPORTANT: Continue working on implementing the new jumping system!!!!!
+        }
+        _controller.OverrideParameters = null;
+        yield return null;
+    }
+
+    /// <summary>
+    /// Call when the JumpCo Coroutine is interrupted.
+    /// </summary>
+    private void CancelJump () {
+        StopCoroutine("JumpCo");
+        _controller.OverrideParameters = null;
     }
 
     /// <summary>

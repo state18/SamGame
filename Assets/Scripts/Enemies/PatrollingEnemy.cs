@@ -11,7 +11,7 @@ public class PatrollingEnemy : Enemy {
     private CharacterController2D controller;
 
     void Start() {
-        base.Initialize();
+        Initialize();
         controller = GetComponent<CharacterController2D>();
         direction = Vector2.left;
         startPosition = transform.position;

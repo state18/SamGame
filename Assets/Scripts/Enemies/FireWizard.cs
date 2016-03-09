@@ -23,7 +23,7 @@ public class FireWizard : Enemy {
     private Rect playerDetectionBox;
 
     void Start() {
-        base.Initialize();
+        Initialize();
         direction = Vector2.left;
 
         controller = GetComponent<CharacterController2D>();
