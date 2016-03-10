@@ -14,23 +14,17 @@ public class PistolItem : Item
     // private CharacterController2D playerController;
     public Projectile projectile;
 
-	private int ongoingShots;
+	private int ongoingShots = 0;
 	private float cooldown = 0f;
 	public float cooldownTime;
 
-	public PistolItem ()
-	{
-		InHand = false;
-		IsObtained = false;
-		ongoingShots = 0;
-	}
 	// Use this for initialization
 	void Start ()
 	{
         player = FindObjectOfType<Player>();
         // playerController = player.GetComponent<CharacterController2D>();
         playerAnim = player.GetComponent<Animator>();
-        
+
 	}
 	
 	// Update is called once per frame
@@ -42,7 +36,7 @@ public class PistolItem : Item
 
 	public override void Use ()
 	{
-		if (cooldown <= 0) {
+		if (cooldown <= 0 && !player.IsClimbing) {
 			GetComponent<AudioSource> ().Play ();
 			StartCoroutine ("UseCo");
 		}

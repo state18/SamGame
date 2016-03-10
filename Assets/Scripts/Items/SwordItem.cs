@@ -5,7 +5,8 @@ public class SwordItem : Item {
 
     public Transform handStart;
     public Transform handFinish;
-    private CharacterController2D player;
+    private CharacterController2D playerController;
+    private Player player;
 
     Animator playerAnim;
 
@@ -22,8 +23,9 @@ public class SwordItem : Item {
 
     // Use this for initialization
     void Start() {
-        playerAnim = handStart.GetComponentInParent<Animator>();
-        player = handStart.GetComponentInParent<CharacterController2D>();
+        player = FindObjectOfType<Player>();
+        playerAnim = player.GetComponent<Animator>();
+        playerController = player.GetComponent<CharacterController2D>();
 
     }
 
@@ -34,7 +36,7 @@ public class SwordItem : Item {
     }
 
     public override void Use() {
-        if (cooldown <= 0) {
+        if (cooldown <= 0 && !player.IsClimbing) {
             GetComponent<AudioSource>().Play();
             StartCoroutine("UseCo");
 
@@ -46,7 +48,7 @@ public class SwordItem : Item {
         ongoingPunches++;
         playerAnim.SetBool("isPunching", true);
 
-        float adjustedDistance = (Mathf.Abs(player.Velocity.x) > 0) ? distance + .33f : distance;
+        float adjustedDistance = (Mathf.Abs(playerController.Velocity.x) > 0) ? distance + .33f : distance;
         Vector2 origin = Vector2.Lerp(new Vector2(handStart.position.x, handStart.position.y), new Vector2(handFinish.position.x, handFinish.position.y), .5f);
 
         if (handStart.parent.transform.localScale.x > 0) {

@@ -177,7 +177,6 @@ public class Player : MonoBehaviour, ITakeDamage {
     // TODO Make an animation that plays for a bit upon getting hit.
     public void TakeDamage(int damage, GameObject instigator) {
         if (!IsInvulnerable) {
-            CancelJump();
             ouchEffect.Play();
 
             for (int i = Health - 1; i > Health - damage - 1; i--) {
@@ -216,13 +215,6 @@ public class Player : MonoBehaviour, ITakeDamage {
             if (IsFacingRight)
                 Flip();
 
-        // IMPORTANT: Rework jumping to a variable jump dependent on how long the jump key is held down.
-        //  When the Jump button is pressed and the player isn't currently jumping, start a coroutine that will execute the jumping process.
-        //  To avoid the jetpack feel:
-        //      Gravity will be turned off during the jump routine. This is because an artificial gravity-like feel is incorporated into the routine itself.
-        //      Establish a maximum jump time. When this time is reached OR if the player releases the button.
-        //      The earliest frames of the jump will be the strongest in terms of force. As the jump goes on, the force will decrease, reaching 0 at maxTime.
-        //  The jumping coroutine will exit when either the player releases the jump button or the maxTime has passed.
         if (Input.GetButtonDown("Jump")) {
 
             if (_controller.State.IsGrounded)
@@ -267,6 +259,10 @@ public class Player : MonoBehaviour, ITakeDamage {
         IsFacingRight = transform.localScale.x > 0;
     }
 
+    /// <summary>
+    /// A variable height jump dependent upon how long the player presses the Jump button.
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator JumpCo () {
 
         // Enabling whileJumpingParameters to turn off gravity.
@@ -274,13 +270,15 @@ public class Player : MonoBehaviour, ITakeDamage {
         _controller.OverrideParameters = whileJumpingParameters;
 
         // Continue jumping if the button is being pressed, the jump hasn't exceeded max duration, not colliding against a ceiling, and still using whileJumpingParameters.
-        // Note: Canceling this coroutine when taking damage/dying/ occurs on a per case basis by calling the CancelJump method.
+        // Note: Canceling this coroutine when getting knocked back/dying occurs on a per case basis by calling the CancelJump method.
         while (Input.GetButton("Jump") && jumpTimer < maxJumpDuration && !_controller.State.IsCollidingAbove && _controller.OverrideParameters == whileJumpingParameters) {
             float proportionCompleted = jumpTimer / maxJumpDuration;
-            //IMPORTANT: Continue working on implementing the new jumping system!!!!!
+            float jumpForce = Mathf.Lerp(whileJumpingParameters.JumpMagnitude, 0f, proportionCompleted);
+            _controller.SetVerticalForce(jumpForce);
+            jumpTimer += Time.deltaTime;
+            yield return null;
         }
         _controller.OverrideParameters = null;
-        yield return null;
     }
 
     /// <summary>
@@ -299,6 +297,7 @@ public class Player : MonoBehaviour, ITakeDamage {
         if (!knockbackActive) {
             knockbackActive = true;
             IsClimbing = false;
+            CancelJump();
             StartCoroutine(KnockbackCo(instigatorPosition));
         }
     }

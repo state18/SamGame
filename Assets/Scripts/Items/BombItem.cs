@@ -7,26 +7,8 @@ public class BombItem : Item
 	public GameObject bombPrefab;
 	//private float cooldown = 0f;
 	public float timeUntilDetonation;
-	private int ongoingBombs;         //no more than 2 at a time
-	
-	public BombItem ()
-	{
-		InHand = false;
-		IsObtained = false;
-		ongoingBombs = 0;
-	}
-	// Use this for initialization
-	void Start ()
-	{
+	private int ongoingBombs = 0;         //no more than 2 at a time
 
-	}
-	
-	// Update is called once per frame
-	void Update ()
-	{
-
-	}
-	
 	public override void Use ()
 	{
 		if (ongoingBombs < 2) 

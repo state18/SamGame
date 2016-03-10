@@ -8,6 +8,8 @@ using UnityEngine.UI;
 // 2 = bombs
 
 public class ItemManager : MonoBehaviour {
+    public static ItemManager Instance;
+
     public GameObject pistol;
     public GameObject hand;
     public GameObject bombs;
@@ -16,19 +18,23 @@ public class ItemManager : MonoBehaviour {
     public Image pistolHUD;
     public Image bombHUD;
 
-    public static int size = 3;
+    private const int size = 3;
 
+    private GameObject[] items;
+    private Image[] activeItemHUD;
 
-    public static GameObject[]
-        items;
+    private int currentIndex;
 
-    public static Image[] activeItemHUD;
+    private Player player;
 
-    public static int currentIndex;
-    public static int itemsObtained;   //number of items obtained
+    void Awake () {
+        Instance = this;
+    }
 
     // Use this for initialization
     void Start() {
+
+        player = FindObjectOfType<Player>();
 
         // Hard code the following as more items are added to the game. This structure will never change throughout the game.
 
@@ -53,9 +59,6 @@ public class ItemManager : MonoBehaviour {
         //items [1].GetComponent<Item> ().IsObtained = true;
         //items [2].GetComponent<Item> ().IsObtained = true;
 
-        //items = new Item[size];
-
-
     }
 
     // Update is called once per frame
@@ -67,19 +70,18 @@ public class ItemManager : MonoBehaviour {
             Cycle(1);
         }
 
-        if (Input.GetButtonDown("Use"))
+        if (Input.GetButtonDown("Use") && !player.IsDead)
             items[currentIndex].GetComponent<Item>().Use();
 
     }
 
-    public static void Cycle(int direction) {
+    public void Cycle(int direction) {
         items[currentIndex].GetComponent<Item>().InHand = false;
         activeItemHUD[currentIndex].GetComponent<Image>().enabled = false;
 
         do {
 
             currentIndex += direction;
-
 
             if (currentIndex < 0) {
                 currentIndex = items.Length - 1;
@@ -97,7 +99,7 @@ public class ItemManager : MonoBehaviour {
     }
 
 
-    public static void DisableItem(int index) {
+    public void DisableItem(int index) {
         if (items[index].GetComponent<Item>().IsObtained) {
             items[index].GetComponent<Item>().IsObtained = false;
             items[index].GetComponent<Item>().InHand = false;
@@ -105,11 +107,10 @@ public class ItemManager : MonoBehaviour {
             if (currentIndex == index) {
                 Cycle(1);
             }
-            itemsObtained--;
         }
     }
 
-    public static void EnableItem(int index) {
+    public void EnableItem(int index) {
         if (!items[index].GetComponent<Item>().IsObtained) {
             items[index].GetComponent<Item>().IsObtained = true;
             items[index].GetComponent<Item>().InHand = true;
@@ -119,7 +120,6 @@ public class ItemManager : MonoBehaviour {
             activeItemHUD[currentIndex].GetComponent<Image>().enabled = false;
             currentIndex = index;
 
-            itemsObtained++;
         }
     }
 }

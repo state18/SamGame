@@ -6,7 +6,7 @@ using System.Linq;
 public class LevelManager : MonoBehaviour {
     public static LevelManager Instance { get; private set; }
 
-    public Player Player { get; private set; }
+    public Player player { get; private set; }
     public CameraController Camera { get; private set; }
 
     public Checkpoint currentCheckPoint { get; set; }
@@ -23,7 +23,7 @@ public class LevelManager : MonoBehaviour {
     
     public void Start() {
         currentCheckPoint = GameObject.FindGameObjectWithTag("StartingPoint").GetComponent<Checkpoint>();
-        Player = FindObjectOfType<Player>();
+        player = FindObjectOfType<Player>();
         Camera = FindObjectOfType<CameraController>();
         gameOverSound = GetComponent<AudioSource>();
         deadEnemies = new List<GameObject>();
@@ -31,9 +31,9 @@ public class LevelManager : MonoBehaviour {
         #if UNITY_EDITOR
                 // If DebugSpawn is set, have it override the starting spawn point
                 if (DebugSpawn != null)
-                    DebugSpawn.SpawnPlayer(Player);
+                    DebugSpawn.SpawnPlayer(player);
                 else if (currentCheckPoint != null)
-                    currentCheckPoint.SpawnPlayer(Player);
+                    currentCheckPoint.SpawnPlayer(player);
         #else
                 if (currentCheckPoint != null)
                     currentCheckPoint.SpawnPlayer(Player);
@@ -54,7 +54,7 @@ public class LevelManager : MonoBehaviour {
 
     private IEnumerator KillPlayerCo() {
 
-        Player.Kill();
+        player.Kill();
         Camera.IsFollowing = false;
         gameOverSound.Play();
 
@@ -78,7 +78,7 @@ public class LevelManager : MonoBehaviour {
         ClearDeadEnemies();
 
         if (currentCheckPoint != null)
-            currentCheckPoint.SpawnPlayer(Player);
+            currentCheckPoint.SpawnPlayer(player);
 
         yield return StartCoroutine(ScreenFader.instance.FadeToClear());
     }
