@@ -40,6 +40,7 @@ public class Player : MonoBehaviour, ITakeDamage {
     // Health information
     public int Health { get; private set; }
     public bool IsDead { get; private set; }
+    public bool canUseItems { get; private set; }
     public Toggle[] hearts;
     public bool IsInvulnerable { get; private set; }
     public AudioSource ouchEffect;          // On damage effect
@@ -138,6 +139,7 @@ public class Player : MonoBehaviour, ITakeDamage {
         _animator.SetBool("isHurt", true);
         CancelJump();
         StopAllCoroutines();
+        canUseItems = false;
         _controller.HandleCollisions = false;
         GetComponent<Collider2D>().enabled = false;
         if (ExitAllTriggers != null)
@@ -163,6 +165,7 @@ public class Player : MonoBehaviour, ITakeDamage {
             Flip();
 
         IsDead = false;
+        canUseItems = true;
         GetComponent<Collider2D>().enabled = true;
         _controller.HandleCollisions = true;
         _controller.SetForce(Vector2.zero);
@@ -305,6 +308,7 @@ public class Player : MonoBehaviour, ITakeDamage {
             knockbackActive = true;
             IsClimbing = false;
             CancelJump();
+            canUseItems = false;
             StartCoroutine(KnockbackCo(instigatorPosition));
         }
     }
@@ -339,6 +343,7 @@ public class Player : MonoBehaviour, ITakeDamage {
 
         //Debug.Log("knockback ended");
         knockbackActive = false;
+        canUseItems = true;
     }
     public void BuffInvulnerability() {
         StartCoroutine("BuffInvulnerabilityCo");

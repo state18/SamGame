@@ -27,7 +27,7 @@ public class ItemManager : MonoBehaviour {
 
     private Player player;
 
-    void Awake () {
+    void Awake() {
         Instance = this;
     }
 
@@ -63,18 +63,21 @@ public class ItemManager : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-        if (Input.GetKeyDown(KeyCode.Q)) {
-            Cycle(-1);
-        }
-        if (Input.GetKeyDown(KeyCode.W)) {
-            Cycle(1);
+        // The only time a player can't swap their items is when they're dead (or in the future, when a cutscene is active)
+        if (!player.IsDead) {
+            if (Input.GetKeyDown(KeyCode.Q)) {
+                Cycle(-1);
+            }
+            if (Input.GetKeyDown(KeyCode.W)) {
+                Cycle(1);
+            }
         }
 
-        if (Input.GetButtonDown("Use"))
+        if (Input.GetButtonDown("Use") && player.canUseItems)
             items[currentIndex].GetComponent<Item>().Use();
 
-    }
 
+    }
     public void Cycle(int direction) {
         items[currentIndex].GetComponent<Item>().InHand = false;
         activeItemHUD[currentIndex].GetComponent<Image>().enabled = false;

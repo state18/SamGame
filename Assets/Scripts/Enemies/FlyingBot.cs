@@ -199,7 +199,7 @@ public class FlyingBot : Enemy {
         var actualDistanceBetweenRays = myCollider.bounds.size.x / (rayCount - 1);
 
         // Initializing distanceToSlam to -1 is useful later on, because if it remains -1, we know no relevant point has been hit by the raycasts.
-        float distanceToSlam = -1f;
+        float distanceToSlam = slamRaycastDistance;
         for (int i = 0; i < rayCount; i++) {
             var rayVector = new Vector2(leftRayOrigin.x + (i * actualDistanceBetweenRays), leftRayOrigin.y);
             var raycastHit = Physics2D.RaycastAll(rayVector, Vector2.down, slamRaycastDistance, whatisGround);
@@ -214,28 +214,12 @@ public class FlyingBot : Enemy {
                 continue;
 
             var minimumDistance = relevantHits.Min(x => x.distance);
-            if (minimumDistance < distanceToSlam || distanceToSlam == -1)
+            if (minimumDistance < distanceToSlam)
                 distanceToSlam = minimumDistance;
-            
+
         }
 
-        Vector3 targetLocation = Vector3.zero;
-        if (distanceToSlam < 0)
-            targetLocation = leftRayOrigin + new Vector3(myCollider.bounds.extents.x, -slamRaycastDistance + myCollider.bounds.extents.y);
-        else if (distanceToSlam > 0)
-            targetLocation = leftRayOrigin + new Vector3(myCollider.bounds.extents.x, -distanceToSlam + myCollider.bounds.extents.y);
-        else {
-            botAnim.speed = 1;
-            botSprite.color = Color.white;
-            brain.popState();
-            brain.pushState(PatrolState);
-        }
-
-        //RaycastHit2D hit = Physics2D.Raycast(new Vector2(transform.position.x, transform.position.y), Vector2.down, slamRaycastDistance, whatisGround);
-
-        // If no ground is hit, the Flying bot will still slam but for a limited distance. (the length of the raycast)
-        //var halfSize = myCollider.size.y / 2 * transform.localScale.y;
-        //Vector3 distanceWithOffset = hit ? new Vector3(0f, halfSize, 0f) + new Vector3(hit.point.x, hit.point.y, 0f): transform.position + new Vector3(0f, -slamRaycastDistance, 0f);
+        var targetLocation = leftRayOrigin + new Vector3(myCollider.bounds.extents.x, -distanceToSlam + myCollider.bounds.extents.y);
 
         yield return new WaitForSeconds(delayUntilSlam);
 
@@ -250,8 +234,8 @@ public class FlyingBot : Enemy {
 
             float step = Speed * 1.5f;
 
-                //Debug.Log("Moving towards hit object!");
-                transform.position = Vector2.MoveTowards(transform.position, targetLocation, step * Time.deltaTime);
+            //Debug.Log("Moving towards hit object!");
+            transform.position = Vector2.MoveTowards(transform.position, targetLocation, step * Time.deltaTime);
 
             var distanceSquared = (transform.position - targetLocation).sqrMagnitude;
 

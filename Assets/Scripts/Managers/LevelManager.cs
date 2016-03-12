@@ -55,7 +55,6 @@ public class LevelManager : MonoBehaviour {
     private IEnumerator KillPlayerCo() {
 
         player.Kill();
-        ItemManager.Instance.gameObject.SetActive(false);
         Camera.IsFollowing = false;
         gameOverSound.Play();
 
@@ -67,7 +66,6 @@ public class LevelManager : MonoBehaviour {
 
         Camera.transform.position = new Vector3(currentCheckPoint.transform.position.x, currentCheckPoint.transform.position.y, Camera.transform.position.z);
         Camera.IsFollowing = true;
-        ItemManager.Instance.gameObject.SetActive(true);
 
         // Respawn recently killed enemies.
         foreach (var enemy in deadEnemies) {
