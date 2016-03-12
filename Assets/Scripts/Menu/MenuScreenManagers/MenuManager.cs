@@ -62,7 +62,7 @@ public class MenuManager : MonoBehaviour
 	}
 	
 	// Update is called once per frame
-	void Update ()                         //TODO cursor movement happens here!!!
+	void Update ()                         
 	{
 		if (!movementLocked) {
 			if (Input.GetAxisRaw ("Vertical") == -1) {

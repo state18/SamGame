@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-//IMPORTANT: Keep an eye on this class. I died one time messing around with the pushing platforms but could not replicate it after repeated attempts.
 /// <summary>
 /// Any GameObject with this component will push entities with the IPushable interface on any of their components upon collision.
 /// </summary>
@@ -52,7 +51,7 @@ public class Pusher : MonoBehaviour {
         Vector3 deltaMovement = _transform.position - positionLastFrame;
         CalculateRayOrigins(deltaMovement);
 
-        if (deltaMovement.y < 0)
+        if (Mathf.Abs(deltaMovement.y) > 0)
             CheckVerticalCollision(deltaMovement);
 
         if (Mathf.Abs(deltaMovement.x) > 0)
@@ -78,24 +77,28 @@ public class Pusher : MonoBehaviour {
     /// </summary>
     /// <param name="deltaMovement">Represents the change in movement of this GameObject this frame.</param>
     private void CheckVerticalCollision(Vector2 deltaMovement) {
+        var isGoingUp = deltaMovement.y > 0;
         var rayDistance = Mathf.Abs(deltaMovement.y) + SkinWidth;
+        var rayDirection = isGoingUp ? Vector2.up : Vector2.down;
+        var rayOrigin = isGoingUp ? _raycastTopLeft : _raycastBottomLeft;
 
         var objectsHit = new HashSet<GameObject>(); 
 
         for (int i = 0; i < TotalVerticalRays; i++) {
-            var rayVector = new Vector2(_raycastBottomLeft.x + (i * _horizontalDistanceBetweenRays), _raycastBottomLeft.y);
+            var rayVector = new Vector2(rayOrigin.x + (i * _horizontalDistanceBetweenRays), rayOrigin.y);
 
-            var rayCastHit = Physics2D.RaycastAll(rayVector, Vector2.down, rayDistance);
-            //Debug.DrawRay(rayVector, Vector2.down * rayDistance, Color.green);
+            var rayCastHit = Physics2D.RaycastAll(rayVector, rayDirection, rayDistance);
+            Debug.DrawRay(rayVector, rayDirection * rayDistance, Color.green);
             if (rayCastHit.Length == 0)
-                return;
+                continue; // was return;
 
             foreach (var hit in rayCastHit) {
                 if (!objectsHit.Contains(hit.collider.gameObject)) {
                     var pushable = (IPushable)hit.collider.GetComponent(typeof(IPushable));
                     if (pushable != null) {
-                        var amountToPush = rayVector.y + deltaMovement.y - hit.point.y - SkinWidth;
-                        pushable.PushVertical(amountToPush / Time.deltaTime);
+                        var amountToPush = rayVector.y + deltaMovement.y - hit.point.y;
+                        amountToPush = isGoingUp ? amountToPush + SkinWidth : amountToPush - SkinWidth;
+                        pushable.PushVertical(amountToPush / Time.deltaTime, gameObject);
                         objectsHit.Add(hit.collider.gameObject);
                     }
                 }
@@ -122,7 +125,7 @@ public class Pusher : MonoBehaviour {
             var rayCastHit = Physics2D.RaycastAll(rayVector, rayDirection, rayDistance);
             //Debug.DrawRay(rayVector, rayDirection * rayDistance, Color.cyan);
             if (rayCastHit.Length == 0)
-                return;
+                continue; //was return;
 
 
             // For each object hit with a component that implements IPushable, apply the proper amount of force to simulate pushing.

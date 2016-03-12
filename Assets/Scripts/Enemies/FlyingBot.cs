@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -194,17 +193,50 @@ public class FlyingBot : Enemy {
         botSprite.color = Color.red;
 
         // IMPORTANT: Bug: Cast multiple rays for more accurate hit detection.
-        RaycastHit2D hit = Physics2D.Raycast(new Vector2(transform.position.x, transform.position.y), Vector2.down, slamRaycastDistance, whatisGround);
+        var leftRayOrigin = myCollider.bounds.center - new Vector3(myCollider.bounds.extents.x, myCollider.bounds.extents.y);
+
+        var rayCount = Mathf.CeilToInt(myCollider.bounds.size.x / .2f + 1);
+        var actualDistanceBetweenRays = myCollider.bounds.size.x / (rayCount - 1);
+
+        // Initializing distanceToSlam to -1 is useful later on, because if it remains -1, we know no relevant point has been hit by the raycasts.
+        float distanceToSlam = -1f;
+        for (int i = 0; i < rayCount; i++) {
+            var rayVector = new Vector2(leftRayOrigin.x + (i * actualDistanceBetweenRays), leftRayOrigin.y);
+            var raycastHit = Physics2D.RaycastAll(rayVector, Vector2.down, slamRaycastDistance, whatisGround);
+            Debug.DrawRay(rayVector, Vector2.down * slamRaycastDistance, Color.red);
+
+            if (raycastHit.Length == 0)
+                continue;
+
+            var relevantHits = raycastHit.Where(x => x.distance > 0f);
+
+            if (relevantHits.Count() == 0)
+                continue;
+
+            var minimumDistance = relevantHits.Min(x => x.distance);
+            if (minimumDistance < distanceToSlam || distanceToSlam == -1)
+                distanceToSlam = minimumDistance;
+            
+        }
+
+        Vector3 targetLocation = Vector3.zero;
+        if (distanceToSlam < 0)
+            targetLocation = leftRayOrigin + new Vector3(myCollider.bounds.extents.x, -slamRaycastDistance + myCollider.bounds.extents.y);
+        else if (distanceToSlam > 0)
+            targetLocation = leftRayOrigin + new Vector3(myCollider.bounds.extents.x, -distanceToSlam + myCollider.bounds.extents.y);
+        else {
+            botAnim.speed = 1;
+            botSprite.color = Color.white;
+            brain.popState();
+            brain.pushState(PatrolState);
+        }
+
+        //RaycastHit2D hit = Physics2D.Raycast(new Vector2(transform.position.x, transform.position.y), Vector2.down, slamRaycastDistance, whatisGround);
 
         // If no ground is hit, the Flying bot will still slam but for a limited distance. (the length of the raycast)
-        Vector3 distanceWithOffset = hit ? new Vector3(0f, myCollider.size.y / 2, 0f) + new Vector3(hit.point.x, hit.point.y, 0f): transform.position + new Vector3(0f, -slamRaycastDistance, 0f);
+        //var halfSize = myCollider.size.y / 2 * transform.localScale.y;
+        //Vector3 distanceWithOffset = hit ? new Vector3(0f, halfSize, 0f) + new Vector3(hit.point.x, hit.point.y, 0f): transform.position + new Vector3(0f, -slamRaycastDistance, 0f);
 
-        //float distanceToSlam = hit.distance - distanceOffset;
-        //Debug.Log("Distance to slam: " + distanceToSlam);
-
-        //Debug.Log("Waiting to turn white again.");
-
-        //yield return CoroutineBridge.instance.myStartCoroutine(CoroutineBridge.instance.Wait(delayUntilSlam));
         yield return new WaitForSeconds(delayUntilSlam);
 
         //Debug.Log("Changing back to white.");
@@ -219,9 +251,9 @@ public class FlyingBot : Enemy {
             float step = Speed * 1.5f;
 
                 //Debug.Log("Moving towards hit object!");
-                transform.position = Vector2.MoveTowards(transform.position, distanceWithOffset, step * Time.deltaTime);
+                transform.position = Vector2.MoveTowards(transform.position, targetLocation, step * Time.deltaTime);
 
-            var distanceSquared = (transform.position - distanceWithOffset).sqrMagnitude;
+            var distanceSquared = (transform.position - targetLocation).sqrMagnitude;
 
             #endregion
 
@@ -240,6 +272,7 @@ public class FlyingBot : Enemy {
 
             }
             #endregion
+
             yield return null;
         }
     }
@@ -249,10 +282,4 @@ public class FlyingBot : Enemy {
         Gizmos.color = Color.blue;
         Gizmos.DrawLine(botBounds.max, botBounds.min);
     }
-
-
 }
-
-
-// 1/19/2016: Figure out how to handle death/respawn of this enemy without unexpected behavior. EDIT: Maybe fixed? It seems to be working but I'm going to keep an eye on this enemy for awhile to make
-// sure nothing breaks.

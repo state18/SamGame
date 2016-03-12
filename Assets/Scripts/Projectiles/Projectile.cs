@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+
 /// <summary>
 /// This abstract class serves as a template for projectile behavior, specifically the
 /// OnTriggerEnter2D method since it is stubbed out with some logic here.

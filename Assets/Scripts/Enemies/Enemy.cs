@@ -25,14 +25,18 @@ public abstract class Enemy : MonoBehaviour, ITakeDamage, IRespawnable {
         enemySounds[0] = gameObject.AddComponent<AudioSource>();
         enemySounds[0].clip = onHitSoundClip;
 
+        for (int i = 0; i < enemySounds.Length; i++) {
+            enemySounds[i].playOnAwake = false;
+        }
+
     }
 
     public virtual void TakeDamage(int damage, GameObject instigator) {
         Health -= damage;
-        if (enemySounds[0] != null)
-            enemySounds[0].Play();
         if (Health <= 0)
             KillMe();
+        else if (enemySounds[0] != null)
+            enemySounds[0].Play();
     }
 
     public virtual void RespawnMe() {

@@ -30,6 +30,7 @@ public class CharacterController2D : MonoBehaviour, IPushable {
     public ControllerParameters2D Parameters { get { return OverrideParameters ?? DefaultParameters; } }
     public ControllerParameters2D OverrideParameters { get; set; }
     public GameObject StandingOn { get; private set; }
+    private GameObject pushedUpBy;
     public Vector3 PlatformVelocity { get; private set; }
 
     public bool resetHorizontalVelocityEachFrame = false;
@@ -146,15 +147,18 @@ public class CharacterController2D : MonoBehaviour, IPushable {
     /// The entity reacts to an external object pushing it vertically.
     /// </summary>
     /// <param name="push">Direction and intensity of the push (Should always be negative for now)</param>
-    public void PushVertical(float push) {
+    public void PushVertical(float push, GameObject instigator) {
+        _pusherVelocity.y = push;
+
         if (push < 0) {
-            _pusherVelocity.y = push;
 
             // Add a bit of a downward push to the entity's velocity to create a "bonk"-like effect.
             // This also helps separate the entity from the platform they just collided with and avoids a hovering effect.
             AddForce(new Vector2(0f, push / 2f));
-        } else
-            Debug.Log("Pushing vertically by a positive number. This should never happen.");
+        } else {
+            pushedUpBy = instigator;
+        }
+
     }
 
     public void LateUpdate() {
@@ -204,15 +208,15 @@ public class CharacterController2D : MonoBehaviour, IPushable {
         // If the velocity is not to be preserved to the next frame, reset the x component. (y component is still needed for gravity.)
         _velocity = resetHorizontalVelocityEachFrame ? new Vector2(0f, _actualVelocity.y) : _actualVelocity;
 
- 
+
         if (State.IsMovingUpSlope)
             _velocity.y = 0;
- 
-        
+
+
         if (StandingOn != null) {
             _activeGlobalPlatformPoint = transform.position;
             _activeLocalPlatformPoint = StandingOn.transform.InverseTransformPoint(transform.position);
-        } 
+        }
     }
 
     private void HandlePushing(Vector2 deltaMovement) {
@@ -227,14 +231,17 @@ public class CharacterController2D : MonoBehaviour, IPushable {
 
         }
         //CalculateRayOrigins();
-        if (Mathf.Abs(deltaMovement.y) > 0) {
-            if (deltaMovement.y > 0) {
-                State.IsCollidingBelow = true;
-            } else
-                State.IsCollidingAbove = true;
-
+        if (deltaMovement.y > 0) {
+            State.IsCollidingBelow = true;
+            // Only push upwards upon first contact with this object. Afterwards HandlePlatforms() will take care of the movement with the platform.
+            if (pushedUpBy == _lastStandingOn) {
+                deltaMovement.y = 0f;
+            } else {
+                MoveVertically(ref deltaMovement);
+            }
+        } else if (deltaMovement.y < 0) {
+            State.IsCollidingAbove = true;
             MoveVertically(ref deltaMovement);
-
         }
 
         _transform.Translate(deltaMovement, Space.World);

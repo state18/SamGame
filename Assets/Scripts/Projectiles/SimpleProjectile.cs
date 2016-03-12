@@ -5,7 +5,6 @@ public class SimpleProjectile : Projectile, ITakeDamage {
     public int Damage;
     public bool knockback;
     public GameObject DestroyedEffect;
-    // public int PointsToGiveToPlayer;
 
     public float TimeToLive;
 

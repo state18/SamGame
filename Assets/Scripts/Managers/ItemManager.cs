@@ -70,7 +70,7 @@ public class ItemManager : MonoBehaviour {
             Cycle(1);
         }
 
-        if (Input.GetButtonDown("Use") && !player.IsDead)
+        if (Input.GetButtonDown("Use"))
             items[currentIndex].GetComponent<Item>().Use();
 
     }

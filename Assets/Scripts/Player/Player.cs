@@ -174,7 +174,6 @@ public class Player : MonoBehaviour, ITakeDamage {
 
     // Deduct the amount of damage taken from player health, then change the UI to represent that.
     // Check if this kills the player. This code will not execute if the player is currently invulnerable.
-    // TODO Make an animation that plays for a bit upon getting hit.
     public void TakeDamage(int damage, GameObject instigator) {
         if (!IsInvulnerable) {
             ouchEffect.Play();
@@ -201,7 +200,7 @@ public class Player : MonoBehaviour, ITakeDamage {
             hearts[i].isOn = true;
         }
     }
-    // TODO Refactor to use GetAxisRaw
+
     private void HandleInput() {
         _normalizedHorizontalSpeed = Input.GetAxisRaw("Horizontal");
         _normalizedVerticalSpeed = Input.GetAxisRaw("Vertical");
@@ -276,8 +275,16 @@ public class Player : MonoBehaviour, ITakeDamage {
             float jumpForce = Mathf.Lerp(whileJumpingParameters.JumpMagnitude, 0f, proportionCompleted);
             _controller.SetVerticalForce(jumpForce);
             jumpTimer += Time.deltaTime;
+
             yield return null;
+
+            // The jump state should cancel if ground moves up into the player while jumping. However, an allowance of .3 seconds is given to
+            // forgive jumps from high velocity upwards moving platforms.
+            if (jumpTimer >= .3f && !_controller.State.IsCollidingBelow)
+                break;
         }
+        // Jump state has been completed/interrupted. To avoid abrupt transition, half the current vertical velocity instead of setting it to zero.
+        _controller.SetVerticalForce(_controller.Velocity.y / 2);
         _controller.OverrideParameters = null;
     }
 
