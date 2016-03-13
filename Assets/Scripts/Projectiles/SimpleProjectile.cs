@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class SimpleProjectile : Projectile, ITakeDamage {
     public int Damage;
-    public bool knockback;
+    public bool knockback; // IMPORTANT: Implement knockback for the player interaction.
     public GameObject DestroyedEffect;
 
     public float TimeToLive;

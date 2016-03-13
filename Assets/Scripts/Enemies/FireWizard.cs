@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class FireWizard : Enemy {
 
-
+    // IMPORTANT: Player can stand inside of this enemy without taking damage if invulnerable.
     public Projectile fireball;
     private SimpleProjectile activeFireball;
     private CharacterController2D controller;
@@ -24,15 +24,12 @@ public class FireWizard : Enemy {
 
     void Start() {
         Initialize();
+        startPosition = transform.position;
         direction = Vector2.left;
 
         controller = GetComponent<CharacterController2D>();
         playerTransform = FindObjectOfType<Player>().transform;
         boxCollider = GetComponent<BoxCollider2D>();
-
-        // This fireball will be pooled as the only one ever in use for this enemy.
-        activeFireball = (SimpleProjectile)Instantiate(activeFireball, transform.position, transform.rotation);
-        activeFireball.enabled = false;
 
         // Calculate the detection rectangle used to search for the player.
         var topLeftOrigin = new Vector2(boxCollider.bounds.min.x - playerDetectionLength, boxCollider.bounds.max.y);
@@ -58,11 +55,13 @@ public class FireWizard : Enemy {
     void Fire() {
 
         canFireIn = fireCooldownTime;
-        activeFireball.transform.position = firePoint.position;
+        var activeFireball = (SimpleProjectile)Instantiate(fireball, firePoint.position, firePoint.rotation);
+        activeFireball.Initialize(gameObject, direction);
+        activeFireball.transform.localScale = activeFireball.transform.localScale * Mathf.Sign(transform.localScale.x);
 
     }
 
-
+    // IMPORTANT: Inaccurate/unexpected detection box after flipping.
     protected override void Flip() {
         base.Flip();
         playerDetectionBox.x = direction == Vector2.right ? playerDetectionBox.x + playerDetectionLength * 2 : playerDetectionBox.x - playerDetectionLength * 2;
