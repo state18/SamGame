@@ -9,6 +9,7 @@ using System;
 /// </summary>
 public class Player : MonoBehaviour, ITakeDamage {
 
+    public static Player Instance; // TODO Use this instead of having objects use FindObjectOfType<Player>() to cache the player.
     // References to components.
     private CharacterController2D _controller;
     private Animator _animator;
@@ -40,7 +41,7 @@ public class Player : MonoBehaviour, ITakeDamage {
     // Health information
     public int Health { get; private set; }
     public bool IsDead { get; private set; }
-    public bool canUseItems { get; private set; }
+    public bool canUseItems { get; private set; } // IMPORTANT: Maybe refactor into a property that performs checks rather than pollute the code with changing this.
     public Toggle[] hearts;
     public bool IsInvulnerable { get; private set; }
     public AudioSource ouchEffect;          // On damage effect
@@ -88,6 +89,7 @@ public class Player : MonoBehaviour, ITakeDamage {
     }
 
     public void Awake() {
+        Instance = this;
         _controller = GetComponent<CharacterController2D>();
         _animator = GetComponent<Animator>();
         _collider = GetComponent<BoxCollider2D>();

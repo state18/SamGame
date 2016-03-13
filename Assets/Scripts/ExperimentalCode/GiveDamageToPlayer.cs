@@ -5,24 +5,36 @@ public class GiveDamageToPlayer : MonoBehaviour {
     public bool knockback;
     public bool instaKill;
 
-    public void OnTriggerStay2D(Collider2D other) {
-        var player = other.GetComponent<Player>();
+    private bool playerInside;
 
-        if (player == null || player.IsDead)
-            return;
+    void Update () {
+        if (playerInside) {
+            if (instaKill) {
+                LevelManager.Instance.KillPlayer();
+                return;
+            }
 
-        if (instaKill) {
-            LevelManager.Instance.KillPlayer();
-            return;
+            // Handles knockback. The direction and magnitude of the knockback is determined by the velocity of the damage giver,
+            // the velocity of the player, and is then multiplied by a scale to determine magnitude.
+            // TODO Possibly make this less player-centric and just look for a IKnockbackable interface.
+            if (knockback && !Player.Instance.IsInvulnerable) {
+                //Debug.Log("knocking back player");
+                Player.Instance.Knockback(transform.position);
+            }
+
+            Player.Instance.TakeDamage(DamageToGive, gameObject);
         }
+    }
 
-        // Handles knockback. The direction and magnitude of the knockback is determined by the velocity of the damage giver,
-        // the velocity of the player, and is then multiplied by a scale to determine magnitude.
-        if (knockback && !player.IsInvulnerable) {
-            //Debug.Log("knocking back player");
-            player.Knockback(transform.position);
+    void OnTriggerEnter2D (Collider2D other) {
+        if (other.GetComponent<Player>() != null) {
+            Player.Instance.ExitAllTriggers += OnTriggerExit2D;
+            playerInside = true;
         }
-       
-        player.TakeDamage(DamageToGive, gameObject);
+    }
+
+    void OnTriggerExit2D (Collider2D other) {
+        Player.Instance.ExitAllTriggers -= OnTriggerExit2D;
+        playerInside = false;
     }
 }
