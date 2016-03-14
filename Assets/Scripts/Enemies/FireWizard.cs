@@ -64,6 +64,6 @@ public class FireWizard : Enemy {
     // IMPORTANT: Inaccurate/unexpected detection box after flipping.
     protected override void Flip() {
         base.Flip();
-        playerDetectionBox.x = direction == Vector2.right ? playerDetectionBox.x + playerDetectionLength * 2 : playerDetectionBox.x - playerDetectionLength * 2;
+        playerDetectionBox.x = direction == Vector2.right ? playerDetectionBox.x + playerDetectionLength : playerDetectionBox.x - playerDetectionLength;
     }
 }
