@@ -1,0 +1,14 @@
+TODO on 3/15/2016
+-----------------
+
+Rework player detection for ladders. The method will probably revolve around the center of the player and how close it is to the center
+of the ladder.
+
+Make the disappearing platforms in level 3 fall instead of outright vanish.
+
+Put together the animation controller for the fire wizard.
+
+Design a half-block structure that has half the height of a regular tile. This is so objects such as bombs and projectiles can pass
+through but blocks the player.
+
+Follow the other instructions preceded by the "IMPORTANT:" tag in the task list.
