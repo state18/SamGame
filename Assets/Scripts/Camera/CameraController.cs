@@ -1,13 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-// TODO: Come back and reevaluate soon.
+// IMPORTANT: Refactor the background variable to be its own component called FollowCamera.
+
 public class CameraController : MonoBehaviour  //This script controls the camera movement and will not allow it to go out of bounds. It will follow the player most of the time.
 {
-    public Transform Player;                    //reference to the player
-
-    public Transform background;       //background to stay with camera
-
     public Vector2 Smoothing;                              //how fast will the camera move to catch up?
 
     public BoxCollider2D Bounds;                //marks the bounds of the level
@@ -22,7 +19,6 @@ public class CameraController : MonoBehaviour  //This script controls the camera
 
     public void Start()                     //bound values initialized
     {
-        Player = FindObjectOfType<Player>().transform;
         _min = Bounds.bounds.min;
         _max = Bounds.bounds.max;
         IsFollowing = true;
@@ -38,9 +34,9 @@ public class CameraController : MonoBehaviour  //This script controls the camera
         if (IsFollowing) {
             // Move towards the player's position. Note: This used to only happen if the player stepped outside of the margins for leeway. That did not cooperate with very slow
             // movement so it has been removed. 
-            x = Mathf.Lerp(x, Player.position.x, Smoothing.x * Time.deltaTime);
+            x = Mathf.Lerp(x, Player.Instance.transform.position.x, Smoothing.x * Time.deltaTime);
 
-            y = Mathf.Lerp(y, Player.position.y, Smoothing.y * Time.deltaTime);
+            y = Mathf.Lerp(y, Player.Instance.transform.position.y, Smoothing.y * Time.deltaTime);
 
         }
 
@@ -54,9 +50,6 @@ public class CameraController : MonoBehaviour  //This script controls the camera
 
         DeltaMovement = new Vector2(transform.position.x - lastPosition.x, transform.position.y - lastPosition.y);
 
-        if (background != null) {
-            background.position = new Vector3(transform.position.x, transform.position.y, background.position.z);
-        }
         //keeps camera from leaving bounds by adding above values
     }
 }

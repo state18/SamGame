@@ -73,7 +73,7 @@ public class ItemManager : MonoBehaviour {
             }
         }
 
-        if (Input.GetButtonDown("Use") && player.canUseItems)
+        if (Input.GetButtonDown("Use") && player.CanUseItems)
             items[currentIndex].GetComponent<Item>().Use();
 
 

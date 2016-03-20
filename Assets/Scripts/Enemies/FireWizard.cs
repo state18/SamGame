@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// The FireWizard is an enemy that fires fireball projectiles at the player if they're within range. The FireWizard doesn't move.
+/// </summary>
 public class FireWizard : Enemy {
 
-    // IMPORTANT: Player can stand inside of this enemy without taking damage if invulnerable.
     public Projectile fireball;
     private SimpleProjectile activeFireball;
     private CharacterController2D controller;
+    private Animator anim;
     private BoxCollider2D boxCollider;
     private Transform playerTransform;
 
@@ -28,14 +32,16 @@ public class FireWizard : Enemy {
         direction = Vector2.left;
 
         controller = GetComponent<CharacterController2D>();
+       
         playerTransform = FindObjectOfType<Player>().transform;
         boxCollider = GetComponent<BoxCollider2D>();
+        anim = GetComponent<Animator>();
 
         // Calculate the detection rectangle used to search for the player.
-        var topLeftOrigin = new Vector2(boxCollider.bounds.min.x - playerDetectionLength, boxCollider.bounds.max.y);
+        var bottomLeftOrigin = new Vector2(boxCollider.bounds.min.x - playerDetectionLength, boxCollider.bounds.min.y);
         var size = new Vector2(playerDetectionLength + boxCollider.bounds.extents.x, boxCollider.bounds.size.y);
 
-        playerDetectionBox = new Rect(topLeftOrigin, size);
+        playerDetectionBox = new Rect(bottomLeftOrigin, size);
 
     }
 
@@ -58,12 +64,29 @@ public class FireWizard : Enemy {
         var activeFireball = (SimpleProjectile)Instantiate(fireball, firePoint.position, firePoint.rotation);
         activeFireball.Initialize(gameObject, direction);
         activeFireball.transform.localScale = activeFireball.transform.localScale * Mathf.Sign(transform.localScale.x);
+        StartCoroutine(HandleAnimation());
 
     }
 
-    // IMPORTANT: Inaccurate/unexpected detection box after flipping.
+    /// <summary>
+    /// Transition to the firing animation then wait for a small amount of time before switching back to the idle animation.
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator HandleAnimation () {
+        anim.SetBool("isFiring", true);
+        yield return new WaitForSeconds(.7f);
+        anim.SetBool("isFiring", false);
+        
+    }
+    
     protected override void Flip() {
         base.Flip();
         playerDetectionBox.x = direction == Vector2.right ? playerDetectionBox.x + playerDetectionLength : playerDetectionBox.x - playerDetectionLength;
+    }
+
+    void OnDisable () {
+        StopAllCoroutines();
+        //anim.SetBool("isFiring", false);
+        canFireIn = 0f;
     }
 }

@@ -29,6 +29,8 @@ public abstract class Enemy : MonoBehaviour, ITakeDamage, IRespawnable {
             enemySounds[i].playOnAwake = false;
         }
 
+        Health = MaxHealth;
+
     }
 
     public virtual void TakeDamage(int damage, GameObject instigator) {

@@ -41,13 +41,21 @@ public class Player : MonoBehaviour, ITakeDamage {
     // Health information
     public int Health { get; private set; }
     public bool IsDead { get; private set; }
-    public bool canUseItems { get; private set; } // IMPORTANT: Maybe refactor into a property that performs checks rather than pollute the code with changing this.
+
     public Toggle[] hearts;
     public bool IsInvulnerable { get; private set; }
     public AudioSource ouchEffect;          // On damage effect
 
     // Status information
     private bool knockbackActive = false;
+    public bool CanUseItems
+    {
+
+        get
+        {
+            return !IsDead && !knockbackActive;
+        }
+    }
 
     // State information specific to the player. This code is here instead of CharacterController since as of right now, climbing is restricted to being
     // something only the player can do.
@@ -141,7 +149,6 @@ public class Player : MonoBehaviour, ITakeDamage {
         _animator.SetBool("isHurt", true);
         CancelJump();
         StopAllCoroutines();
-        canUseItems = false;
         _controller.HandleCollisions = false;
         GetComponent<Collider2D>().enabled = false;
         if (ExitAllTriggers != null)
@@ -167,7 +174,6 @@ public class Player : MonoBehaviour, ITakeDamage {
             Flip();
 
         IsDead = false;
-        canUseItems = true;
         GetComponent<Collider2D>().enabled = true;
         _controller.HandleCollisions = true;
         _controller.SetForce(Vector2.zero);
@@ -267,7 +273,7 @@ public class Player : MonoBehaviour, ITakeDamage {
     /// A variable height jump dependent upon how long the player presses the Jump button.
     /// </summary>
     /// <returns></returns>
-    private IEnumerator JumpCo () {
+    private IEnumerator JumpCo() {
 
         // Enabling whileJumpingParameters to turn off gravity.
         var jumpTimer = 0f;
@@ -290,13 +296,15 @@ public class Player : MonoBehaviour, ITakeDamage {
         }
         // Jump state has been completed/interrupted. To avoid abrupt transition, half the current vertical velocity instead of setting it to zero.
         _controller.SetVerticalForce(_controller.Velocity.y / 2);
-        _controller.OverrideParameters = null;
+
+        if (_controller.OverrideParameters == whileJumpingParameters)
+            _controller.OverrideParameters = null;
     }
 
     /// <summary>
     /// Call when the JumpCo Coroutine is interrupted.
     /// </summary>
-    private void CancelJump () {
+    private void CancelJump() {
         StopCoroutine("JumpCo");
         _controller.OverrideParameters = null;
     }
@@ -310,7 +318,6 @@ public class Player : MonoBehaviour, ITakeDamage {
             knockbackActive = true;
             IsClimbing = false;
             CancelJump();
-            canUseItems = false;
             StartCoroutine(KnockbackCo(instigatorPosition));
         }
     }
@@ -345,7 +352,6 @@ public class Player : MonoBehaviour, ITakeDamage {
 
         //Debug.Log("knockback ended");
         knockbackActive = false;
-        canUseItems = true;
     }
     public void BuffInvulnerability() {
         StartCoroutine("BuffInvulnerabilityCo");

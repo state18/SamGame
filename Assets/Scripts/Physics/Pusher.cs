@@ -65,7 +65,7 @@ public class Pusher : MonoBehaviour {
     /// The key points where the rays will originate are established based on the position before movement.
     /// Note: These points assume the origin of the transform is at the bottom left of the box collider!!!
     /// </summary>
-    private void CalculateRayOrigins(Vector3 deltaMovement) { //IMPORTANT: Look into other properties of BoxCollider2D to find a better way to represent this in generic terms.
+    private void CalculateRayOrigins(Vector3 deltaMovement) { // TODO  Look into other properties of BoxCollider2D to find a better way to represent this in generic terms.
 
         _raycastTopLeft = _boxCollider.bounds.center - deltaMovement + new Vector3(-_boxCollider.bounds.extents.x + SkinWidth, _boxCollider.bounds.extents.y - SkinWidth);
         _raycastBottomRight = _boxCollider.bounds.center - deltaMovement + new Vector3(_boxCollider.bounds.extents.x - SkinWidth, -_boxCollider.bounds.extents.y + SkinWidth);

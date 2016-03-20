@@ -192,7 +192,6 @@ public class FlyingBot : Enemy {
         botAnim.speed = 2;
         botSprite.color = Color.red;
 
-        // IMPORTANT: Bug: Cast multiple rays for more accurate hit detection.
         var leftRayOrigin = myCollider.bounds.center - new Vector3(myCollider.bounds.extents.x, myCollider.bounds.extents.y);
 
         var rayCount = Mathf.CeilToInt(myCollider.bounds.size.x / .2f + 1);
