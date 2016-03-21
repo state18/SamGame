@@ -1,30 +1,31 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 // IMPORTANT: Refactor the background variable to be its own component called FollowCamera.
 
 public class CameraController : MonoBehaviour  //This script controls the camera movement and will not allow it to go out of bounds. It will follow the player most of the time.
 {
     public Vector2 Smoothing;                              //how fast will the camera move to catch up?
-
     public BoxCollider2D Bounds;                //marks the bounds of the level
-
     private Vector3                             //holds values for the bounds above
         _min,
         _max;
 
     public bool IsFollowing { get; set; }                   //is the camera following the player?
-
     public Vector2 DeltaMovement { get; private set; } //Stores the movement of the camera from the previous frame to the current one.
 
-    public void Start()                     //bound values initialized
+    public event Action CameraPositionUpdated;
+
+
+    void Start()                     //bound values initialized
     {
         _min = Bounds.bounds.min;
         _max = Bounds.bounds.max;
         IsFollowing = true;
     }
 
-    public void LateUpdate() {
+    void LateUpdate() {
 
         var lastPosition = transform.position;
 
@@ -50,6 +51,6 @@ public class CameraController : MonoBehaviour  //This script controls the camera
 
         DeltaMovement = new Vector2(transform.position.x - lastPosition.x, transform.position.y - lastPosition.y);
 
-        //keeps camera from leaving bounds by adding above values
+        CameraPositionUpdated();
     }
 }

@@ -36,7 +36,7 @@ public class LevelManager : MonoBehaviour {
                     currentCheckPoint.SpawnPlayer(player);
         #else
                 if (currentCheckPoint != null)
-                    currentCheckPoint.SpawnPlayer(Player);
+                    currentCheckPoint.SpawnPlayer(player);
         #endif
 
         Camera.transform.position = new Vector3(currentCheckPoint.transform.position.x, currentCheckPoint.transform.position.y, Camera.transform.position.z);

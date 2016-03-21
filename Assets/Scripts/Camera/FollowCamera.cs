@@ -14,11 +14,11 @@ public class FollowCamera : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-	
+        Camera.main.GetComponent<CameraController>().CameraPositionUpdated += OnCameraUpdated;
 	}
 	
-	// Update is called once per frame
-	void Update () {
+	// Occurs last in script execution order to guarantee this happens after Camera.
+	void OnCameraUpdated () {
 
         var x = followCameraX ? Camera.main.transform.position.x : transform.position.x;
         var y = followCameraY ? Camera.main.transform.position.y : transform.position.y;
