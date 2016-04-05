@@ -58,6 +58,9 @@ public class FireWizard : Enemy {
             Fire();
     }
 
+    /// <summary>
+    /// Shoot a projectile and trigger the firing animation
+    /// </summary>
     void Fire() {
 
         canFireIn = fireCooldownTime;
@@ -79,6 +82,9 @@ public class FireWizard : Enemy {
         
     }
     
+    /// <summary>
+    /// Call the base Flip and then realign the hitbox for the player detection accordingly.
+    /// </summary>
     protected override void Flip() {
         base.Flip();
         playerDetectionBox.x = direction == Vector2.right ? playerDetectionBox.x + playerDetectionLength : playerDetectionBox.x - playerDetectionLength;

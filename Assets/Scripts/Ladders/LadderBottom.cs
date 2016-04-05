@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// Handles the case of the player wanting to enter/exit a ladder from the bottom
+/// </summary>
 public class LadderBottom : MonoBehaviour {
     bool inside;
 

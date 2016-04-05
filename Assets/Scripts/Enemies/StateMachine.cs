@@ -3,6 +3,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
+/// <summary>
+/// Maintains a stack of "states", and keeps the top element as a running coroutine, with the rest being history.
+/// </summary>
 public class StateMachine  // does not inherit from Monobehavior
 {
     public Stack<Func<IEnumerator>> states;         //stack of states, for prioritization
@@ -11,6 +14,11 @@ public class StateMachine  // does not inherit from Monobehavior
 
     // Use this for initialization
 
+    /// <summary>
+    /// Constructor that needs to know which Monobehaviour the states are coming from, and a starting state.
+    /// </summary>
+    /// <param name="initialState"></param>
+    /// <param name="entity"></param>
     public StateMachine(Func<IEnumerator> initialState, MonoBehaviour entity) {
         states = new Stack<Func<IEnumerator>>();
         this.entity = entity;
@@ -19,6 +27,10 @@ public class StateMachine  // does not inherit from Monobehavior
 
     }
 
+    /// <summary>
+    /// Removes the currently running state from the stack and activates the new top state.
+    /// </summary>
+    /// <returns></returns>
     public Func<IEnumerator> popState()             //Remove the state at the top of the stack and stop its coroutine.
     {
         entity.StopCoroutine(runningCoroutine);
@@ -32,6 +44,10 @@ public class StateMachine  // does not inherit from Monobehavior
         return poppedState;
     }
 
+    /// <summary>
+    /// Stops the current state from running and puts on a new one to be run.
+    /// </summary>
+    /// <param name="state"></param>
     public void pushState(Func<IEnumerator> state)  //Add state to the stack, and start its coroutine, after stopping the current one's coroutine.
     {
         if (getCurrentState() != state) {
@@ -48,11 +64,18 @@ public class StateMachine  // does not inherit from Monobehavior
         }
     }
 
+    /// <summary>
+    /// Stops running the current state and clear the history.
+    /// </summary>
     public void clearStates() {
         entity.StopCoroutine(runningCoroutine);
         states.Clear();
     }
 
+    /// <summary>
+    /// Retrieves the running state
+    /// </summary>
+    /// <returns></returns>
     public Func<IEnumerator> getCurrentState() {
         if (states.Count < 1) {
             //Debug.Log ("stack is empty");

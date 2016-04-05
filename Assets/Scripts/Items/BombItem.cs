@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// Using this item creates a GameObject with component ActiveBomb.
+/// </summary>
 public class BombItem : Item
 {
 	public Transform bombSpawn;
@@ -9,6 +12,9 @@ public class BombItem : Item
 	public float timeUntilDetonation;
 	private int ongoingBombs = 0;         //no more than 2 at a time
 
+    /// <summary>
+    /// If there are less than 2 active bombs, spawn one.
+    /// </summary>
 	public override void Use ()
 	{
 		if (ongoingBombs < 2) 

@@ -1,13 +1,9 @@
 ﻿using UnityEngine;
-using System.Collections;
+
 /// <summary>
 /// This class acts as the controller for physical movement for entities. It is essentially a replacement for the Rigidbody2D component.
 /// </summary>
 /// 
-
-/*
-    Things to work on: Right now if a platform moves up into an entity too fast, it will pass through it. The moving platform system needs to be merged with the pushing system somehow.
-*/
 public class CharacterController2D : MonoBehaviour, IPushable {
 
     // "Skin" is how far inside the player do the rays begin?
@@ -177,6 +173,10 @@ public class CharacterController2D : MonoBehaviour, IPushable {
         Move(_velocity * Time.deltaTime);
     }
 
+    /// <summary>
+    /// Translates the player the desired amount of movement within the collision rules
+    /// </summary>
+    /// <param name="deltaMovement">how far the player should be moved</param>
     private void Move(Vector2 deltaMovement) {
 
         if (HandleCollisions) {
@@ -219,6 +219,10 @@ public class CharacterController2D : MonoBehaviour, IPushable {
         }
     }
 
+    /// <summary>
+    /// Any moving platforms pushing the player are taken into account here
+    /// </summary>
+    /// <param name="deltaMovement"></param>
     private void HandlePushing(Vector2 deltaMovement) {
         CalculateRayOrigins();
         if (Mathf.Abs(deltaMovement.x) > 0) {
@@ -248,7 +252,7 @@ public class CharacterController2D : MonoBehaviour, IPushable {
         _pusherVelocity = Vector2.zero;
     }
     /// <summary>
-    /// If the entity is standing on a platform and that platform has moved, adjust the player's position accordingly.
+    /// If the entity is standing on a platform and that platform has moved, adjust the entity's position accordingly.
     /// The raycasting portions check to make sure the entity is not passing through a wall.
     /// </summary>
     private void HandlePlatforms() {
@@ -367,6 +371,10 @@ public class CharacterController2D : MonoBehaviour, IPushable {
         _raycastBottomLeft = _transform.position + new Vector3(center.x - size.x + SkinWidth, center.y - size.y + SkinWidth);
     }
 
+    /// <summary>
+    /// Horizontal movement is taken care of here. It is clamped if the entity is hitting a wall or platform
+    /// </summary>
+    /// <param name="deltaMovement"></param>
     private void MoveHorizontally(ref Vector2 deltaMovement) {
         var isGoingRight = deltaMovement.x > 0;
         var rayDistance = Mathf.Abs(deltaMovement.x) + SkinWidth;
@@ -402,6 +410,10 @@ public class CharacterController2D : MonoBehaviour, IPushable {
         }
     }
 
+    /// <summary>
+    /// Vertical movement taken into account here, clamping desired movement to comply with collision rules.
+    /// </summary>
+    /// <param name="deltaMovement"></param>
     private void MoveVertically(ref Vector2 deltaMovement) {
         var isGoingUp = deltaMovement.y > 0;
         var rayDistance = Mathf.Abs(deltaMovement.y) + SkinWidth;
@@ -449,6 +461,7 @@ public class CharacterController2D : MonoBehaviour, IPushable {
         }
     }
 
+    // IMPORTANT: All slope code is to be excavated and discarded.
     private void HandleVerticalSlope(ref Vector2 deltaMovement) {
         var center = (_raycastBottomLeft.x + _raycastBottomRight.x) / 2;
         var direction = -Vector2.up;

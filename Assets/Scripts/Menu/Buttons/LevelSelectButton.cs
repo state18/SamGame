@@ -3,13 +3,11 @@ using System.Collections;
 
 public class LevelSelectButton : MenuButton
 {
-	CameraMoveToLocation camMover;
 	MenuManager menuManager;
 	ChooseLevel chooseLevel;
 	// Use this for initialization
 	void Start ()
 	{
-		camMover = Camera.main.GetComponent<CameraMoveToLocation> ();
 		menuManager = FindObjectOfType<MenuManager> ();
 		chooseLevel = FindObjectOfType<ChooseLevel> ();
 	}
@@ -30,7 +28,7 @@ public class LevelSelectButton : MenuButton
 	IEnumerator ButtonFunction ()
 	{
 		Debug.Log ("before yielding");
-		yield return StartCoroutine (camMover.DefaultToLevelSelect ());
+		yield return StartCoroutine (CameraMoveToLocation.Instance.AnimateMovement("DefaultToLevelSelect"));
 		Debug.Log ("moving to level select screen");
 		chooseLevel.enabled = true;
 		ChooseLevel.EnteringScreen ();

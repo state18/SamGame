@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// TODO: Rework menu system to a more object oriented approach
+/// </summary>
 public class BackToMainMenuScreen : MenuButton
 {
-	CameraMoveToLocation camMover;
 	MenuManager menuManager;
 	ChooseLevel chooseLevel;
 	
@@ -13,7 +15,6 @@ public class BackToMainMenuScreen : MenuButton
 		
 		IsSelected = false;
 		IsUnlocked = true;
-		camMover = Camera.main.GetComponent<CameraMoveToLocation> ();
 		menuManager = FindObjectOfType<MenuManager> ();
 		chooseLevel = FindObjectOfType<ChooseLevel> ();
 		
@@ -37,7 +38,7 @@ public class BackToMainMenuScreen : MenuButton
 	{
 
 		Debug.Log ("before yielding");
-		yield return StartCoroutine (camMover.LevelSelectToDefault ());
+		yield return StartCoroutine (CameraMoveToLocation.Instance.AnimateMovement("LevelSelectToDefault"));
 		menuManager.enabled = true;
 		MenuManager.EnteringScreen ();
 	}

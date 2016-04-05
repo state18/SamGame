@@ -17,7 +17,9 @@ public class FollowCamera : MonoBehaviour {
         Camera.main.GetComponent<CameraController>().CameraPositionUpdated += OnCameraUpdated;
 	}
 	
-	// Occurs last in script execution order to guarantee this happens after Camera.
+	/// <summary>
+    /// Called when the CameraController component finishes its LateUpdate method
+    /// </summary>
 	void OnCameraUpdated () {
 
         var x = followCameraX ? Camera.main.transform.position.x : transform.position.x;

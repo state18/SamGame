@@ -2,8 +2,9 @@
 using System.Collections;
 using System;
 
-// IMPORTANT: Refactor the background variable to be its own component called FollowCamera.
-
+/// <summary>
+/// Controls the movement of the main camera.
+/// </summary>
 public class CameraController : MonoBehaviour  //This script controls the camera movement and will not allow it to go out of bounds. It will follow the player most of the time.
 {
     public Vector2 Smoothing;                              //how fast will the camera move to catch up?
@@ -15,8 +16,7 @@ public class CameraController : MonoBehaviour  //This script controls the camera
     public bool IsFollowing { get; set; }                   //is the camera following the player?
     public Vector2 DeltaMovement { get; private set; } //Stores the movement of the camera from the previous frame to the current one.
 
-    public event Action CameraPositionUpdated;
-
+    public Action CameraPositionUpdated;
 
     void Start()                     //bound values initialized
     {
@@ -39,6 +39,9 @@ public class CameraController : MonoBehaviour  //This script controls the camera
 
             y = Mathf.Lerp(y, Player.Instance.transform.position.y, Smoothing.y * Time.deltaTime);
 
+            //x = Player.Instance.transform.position.x;
+            //y = Player.Instance.transform.position.y;
+
         }
 
         var cameraHalfWidth = Camera.main.orthographicSize * ((float)Screen.width / Screen.height);     //half of the camera size used for calculations
@@ -51,6 +54,7 @@ public class CameraController : MonoBehaviour  //This script controls the camera
 
         DeltaMovement = new Vector2(transform.position.x - lastPosition.x, transform.position.y - lastPosition.y);
 
-        CameraPositionUpdated();
+        if (CameraPositionUpdated != null)
+            CameraPositionUpdated();
     }
 }

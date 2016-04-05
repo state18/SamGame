@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// If this entity touches the player, the player will receive damage.
+/// </summary>
 public class GiveDamageToPlayer : MonoBehaviour {
     public int DamageToGive = 10;
     public bool knockback;

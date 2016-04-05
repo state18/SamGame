@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// This tall enemy jumps around constantly.
+/// </summary>
 public class JumpingGoblin : Enemy {
 
     private CharacterController2D controller;

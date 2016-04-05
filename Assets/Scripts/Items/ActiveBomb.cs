@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// This component is attached to a bomb, which will detonate after a period of time, damaging entities in the radius and destroying certain terrain.
+/// </summary>
 public class ActiveBomb : MonoBehaviour {
     public int damage;
     float lifetime = 3f;

@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// This item allows the player to perform a melee attack.
+/// </summary>
 public class SwordItem : Item {
 
     public Transform handStart;
@@ -35,6 +38,9 @@ public class SwordItem : Item {
             cooldown -= Time.deltaTime;
     }
 
+    /// <summary>
+    /// Perform a melee attack if off cooldown
+    /// </summary>
     public override void Use() {
         if (cooldown <= 0 && !player.IsClimbing) {
             GetComponent<AudioSource>().Play();

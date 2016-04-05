@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
+/// <summary>
+/// Handles important tasks on the scope of the level such as player death/respawn, enemy death/respawn, and camera enabling/disabling.
+/// </summary>
 public class LevelManager : MonoBehaviour {
     public static LevelManager Instance { get; private set; }
 
@@ -48,6 +51,9 @@ public class LevelManager : MonoBehaviour {
         
     }
 
+    /// <summary>
+    /// The player is disabled for a bit, and then the player, along with enemies, respawn
+    /// </summary>
     public void KillPlayer() {
         StartCoroutine(KillPlayerCo());
     }
@@ -84,10 +90,17 @@ public class LevelManager : MonoBehaviour {
         yield return StartCoroutine(ScreenFader.instance.FadeToClear());
     }
 
+    /// <summary>
+    /// An enemy has died. Add it to the list
+    /// </summary>
+    /// <param name="enemy"></param>
     public void AddDeadEnemy(GameObject enemy) {
         deadEnemies.Add(enemy);
     }
 
+    /// <summary>
+    /// Clear the history of dead enemies
+    /// </summary>
     public void ClearDeadEnemies() {
         deadEnemies.Clear();
     }

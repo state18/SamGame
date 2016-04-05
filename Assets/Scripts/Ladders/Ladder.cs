@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// Allows the player to switch to the climbing state if inside. (Needs work)
+/// </summary>
 public class Ladder : MonoBehaviour {
     bool inside;
 
@@ -20,6 +23,7 @@ public class Ladder : MonoBehaviour {
         }
     }
 
+    /// <param name="other"></param>
     void OnTriggerEnter2D(Collider2D other) {
         Player player = other.GetComponent<Player>();
         if (player != null) {

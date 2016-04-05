@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// Upon touching the player, they will receive an item whose type is specified by an integer.
+/// </summary>
 public class PickupItem : MonoBehaviour
 {
 

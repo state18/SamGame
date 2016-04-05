@@ -7,6 +7,9 @@ using UnityEngine.UI;
 // 1 = pistol
 // 2 = bombs
 
+/// <summary>
+/// Connects the items HUD with the item logic, and the player with the items
+/// </summary>
 public class ItemManager : MonoBehaviour {
     public static ItemManager Instance;
 
@@ -78,6 +81,10 @@ public class ItemManager : MonoBehaviour {
 
 
     }
+    /// <summary>
+    /// Selects the "next" item
+    /// </summary>
+    /// <param name="direction">which adjacent item is chosen</param>
     public void Cycle(int direction) {
         items[currentIndex].GetComponent<Item>().InHand = false;
         activeItemHUD[currentIndex].GetComponent<Image>().enabled = false;
@@ -101,7 +108,10 @@ public class ItemManager : MonoBehaviour {
         Debug.Log("Current index:" + currentIndex);
     }
 
-
+    /// <summary>
+    /// An item is removed from the player's inventory
+    /// </summary>
+    /// <param name="index">item to be removed</param>
     public void DisableItem(int index) {
         if (items[index].GetComponent<Item>().IsObtained) {
             items[index].GetComponent<Item>().IsObtained = false;
@@ -113,6 +123,10 @@ public class ItemManager : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// An item is added to the player's inventory
+    /// </summary>
+    /// <param name="index">item to be enabled</param>
     public void EnableItem(int index) {
         if (!items[index].GetComponent<Item>().IsObtained) {
             items[index].GetComponent<Item>().IsObtained = true;

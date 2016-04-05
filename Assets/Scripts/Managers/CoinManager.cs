@@ -2,33 +2,26 @@
 using System.Collections;
 using UnityEngine.UI;
 
-public class CoinManager : MonoBehaviour
-{
+/// <summary>
+/// Tracks the number of yellow coins collected, and if the blue coin has been collected
+/// </summary>
+public class CoinManager : MonoBehaviour {
 
-	public static int coinTotal;
-	public Text coinText;
-	public Toggle blueCoin;
+    public static int coinTotal;
+    public Text coinText;
+    public Toggle blueCoin;
 
-	// Use this for initialization
-	void Start ()
-	{
-	
-	}
-	
-	// Update is called once per frame
-	void Update ()
-	{
-	
-	}
+    /// <summary>
+    /// Adds the appropriate coin to the obtained coins
+    /// </summary>
+    /// <param name="coinType">type of coin obtained</param>
+    public void CollectCoin(int coinType) {
+        if (coinType == 0) {
+            coinTotal++;
+            coinText.text = "0" + coinTotal;
 
-	public void CollectCoin (int coinType)
-	{
-		if (coinType == 0) {
-			coinTotal++;
-			coinText.text = "0" + coinTotal;
-
-		} else if (coinType == 1) {
-			blueCoin.isOn = true;
-		}
-	}
+        } else if (coinType == 1) {
+            blueCoin.isOn = true;
+        }
+    }
 }

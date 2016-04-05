@@ -1,6 +1,8 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
+/// <summary>
+/// This component will make an entity move right and left, turning around upon hitting a wall or sometimes a ledge.
+/// </summary>
 public class PatrollingEnemy : Enemy {
    
     public enum PatrolType { IgnoreEdges, EdgeGuard}

@@ -31,6 +31,9 @@ public class PistolItem : Item {
             cooldown -= Time.deltaTime;
     }
 
+    /// <summary>
+    /// Fire a bullet if not on cooldown and player isn't climbing
+    /// </summary>
     public override void Use() {
         if (cooldown <= 0 && !player.IsClimbing) {
             GetComponent<AudioSource>().Play();

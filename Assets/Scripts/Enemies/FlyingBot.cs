@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-
+/// <summary>
+/// Holds the states used by the FlyingBot. They are passed into an instance of StateMachine to be managed as coroutines.
+/// </summary>
 public class FlyingBot : Enemy {
 
     //Patrol editable fields
@@ -81,6 +83,10 @@ public class FlyingBot : Enemy {
         GetComponent<Animator>().speed = 1;
     }
 
+    /// <summary>
+    /// Follow a path going from point to point.
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator PatrolState()    //Move around a contained area
     {
         //Debug.Log("Patrolling");
@@ -125,6 +131,10 @@ public class FlyingBot : Enemy {
         }
     }
 
+    /// <summary>
+    /// Move towards a point offset vertically from the player.
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator MoveToPlayerState()  //Fly over the player while they are in range of the entity AND within the entity's max bounds
     {
         //Debug.Log("Moving To Player");
@@ -183,6 +193,10 @@ public class FlyingBot : Enemy {
     }
 
 
+    /// <summary>
+    /// After a delay, move downwards until hitting ground, then transition to PatrolState.
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator SlamDownwardsState() // After a brief delay, slam downwards (this is the window for the player to kill this enemy)
     {
         #region SlamDownwards Entry
