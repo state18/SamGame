@@ -6,7 +6,7 @@ using System.Collections;
 /// </summary>
 public class BackToMainMenuScreen : MenuButton
 {
-	MenuManager menuManager;
+	MainMenuScreen menuManager;
 	ChooseLevel chooseLevel;
 	
 	// Use this for initialization
@@ -15,7 +15,7 @@ public class BackToMainMenuScreen : MenuButton
 		
 		IsSelected = false;
 		IsUnlocked = true;
-		menuManager = FindObjectOfType<MenuManager> ();
+		menuManager = FindObjectOfType<MainMenuScreen> ();
 		chooseLevel = FindObjectOfType<ChooseLevel> ();
 		
 	}
@@ -28,18 +28,7 @@ public class BackToMainMenuScreen : MenuButton
 	
 	public override void OnSelectButton ()
 	{
-		ChooseLevel.LeavingScreen ();
-		chooseLevel.enabled = false;
-		StartCoroutine ("OnSelectButtonContinue");
+        StartCoroutine(MenuManager.Instance.ChangeScreen("MainMenuScreen"));
 		
-	} 
-	
-	IEnumerator OnSelectButtonContinue ()
-	{
-
-		Debug.Log ("before yielding");
-		yield return StartCoroutine (CameraMoveToLocation.Instance.AnimateMovement("LevelSelectToDefault"));
-		menuManager.enabled = true;
-		MenuManager.EnteringScreen ();
 	}
 }
