@@ -69,7 +69,7 @@ public class Player : MonoBehaviour, ITakeDamage {
 
     // Climbing fields/properties
     public ControllerParameters2D climbingParameters;
-    public bool CanClimb { get; set; }
+    //public bool CanClimb { get; set; }
     private bool isClimbing;
 
     public bool IsClimbing
@@ -109,7 +109,6 @@ public class Player : MonoBehaviour, ITakeDamage {
     }
 
     public void Update() {
-
         if (_controller.IsBeingCrushed)
             LevelManager.Instance.KillPlayer();
 
@@ -127,6 +126,7 @@ public class Player : MonoBehaviour, ITakeDamage {
 
             _controller.SetForce(new Vector2(_normalizedHorizontalSpeed * MaxSpeed / 2.5f, _normalizedVerticalSpeed * MaxSpeed / 2.5f));
             // Handles the intersection of ladders with the ground
+            // Note: This line of code appears to completely negate the legacy LadderBottom script.
             if (_controller.State.IsCollidingBelow && _normalizedVerticalSpeed == -1)
                 IsClimbing = false;
         } else if (!knockbackActive) {
@@ -213,6 +213,11 @@ public class Player : MonoBehaviour, ITakeDamage {
     }
 
     private void HandleInput() {
+        // Just a test of pausing the game (uncomment to test pieces of the game and ensure coroutines cooperate with it)
+        //if (Input.GetButtonDown("Use")) {
+
+        //    Time.timeScale = Time.timeScale == 1 ? 0 : 1;
+        //}
         _normalizedHorizontalSpeed = Input.GetAxisRaw("Horizontal");
         _normalizedVerticalSpeed = Input.GetAxisRaw("Vertical");
 
@@ -230,8 +235,7 @@ public class Player : MonoBehaviour, ITakeDamage {
             if (_controller.State.IsGrounded)
                 StartCoroutine("JumpCo");
 
-            if (IsClimbing)
-                IsClimbing = false;
+            IsClimbing = false;
         }
 
         if (Input.GetButtonDown("Respawn"))

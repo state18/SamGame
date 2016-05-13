@@ -16,13 +16,8 @@ public class MainMenuScreen : MenuScreen {
     public GameObject levelSelectArrow;
     public GameObject quitGameArrow;
 
-
-
     public static int currentIndex;
     public static int numButtons = 3;
-
-    bool axisInUse;
-    public bool movementLocked;
 
     void Awake() {
         //Are there any other instances of this class?
@@ -60,31 +55,31 @@ public class MainMenuScreen : MenuScreen {
 
     // Update is called once per frame
     protected override void Update() {
-        if (!movementLocked) {
-            if (Input.GetAxisRaw("Vertical") == -1) {
-                if (!axisInUse) {
-                    Cycle(-1);
 
-                    axisInUse = true;
-                }
+        if (Input.GetAxisRaw("Vertical") == -1) {
+            if (!axisInUse) {
+                Cycle(-1);
 
-            } else if (Input.GetAxisRaw("Vertical") == 1) {
-                if (!axisInUse) {
-                    Cycle(1);
-
-                    axisInUse = true;
-                }
-
-            } else if (Input.GetAxisRaw("Vertical") == 0) {
-                axisInUse = false;
+                axisInUse = true;
             }
 
-            if (Input.GetButtonDown("Jump")) {
+        } else if (Input.GetAxisRaw("Vertical") == 1) {
+            if (!axisInUse) {
+                Cycle(1);
 
-                menuButtons[currentIndex].GetComponent<MenuButton>().OnSelectButton();
+                axisInUse = true;
             }
 
+        } else if (Input.GetAxisRaw("Vertical") == 0) {
+            axisInUse = false;
         }
+
+        if (Input.GetButtonDown("Jump")) {
+
+            menuButtons[currentIndex].GetComponent<MenuButton>().OnSelectButton();
+        }
+
+
     }
 
     public void Cycle(int direction) {
@@ -95,21 +90,13 @@ public class MainMenuScreen : MenuScreen {
 
             currentIndex -= direction;
 
-
             if (currentIndex < 0) {
                 currentIndex = menuButtons.Length - 1;
-
-
-
 
             } else if (currentIndex > menuButtons.Length - 1) {
                 currentIndex = 0;
 
-
-
             }
-
-
 
         } while (!menuButtons[currentIndex].GetComponent<MenuButton>().IsUnlocked);
 
@@ -119,11 +106,5 @@ public class MainMenuScreen : MenuScreen {
         Debug.Log("Current index:" + currentIndex);
     }
 
-    public static void LeavingScreen() {
-        Instance.movementLocked = true;
-    }
 
-    public static void EnteringScreen() {
-        Instance.movementLocked = false;
-    }
 }

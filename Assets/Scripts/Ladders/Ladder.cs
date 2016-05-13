@@ -23,7 +23,6 @@ public class Ladder : MonoBehaviour {
         }
     }
 
-    /// <param name="other"></param>
     void OnTriggerEnter2D(Collider2D other) {
         Player player = other.GetComponent<Player>();
         if (player != null) {

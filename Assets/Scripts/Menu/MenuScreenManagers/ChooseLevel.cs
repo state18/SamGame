@@ -12,8 +12,6 @@ public class ChooseLevel : MenuScreen {
     public static int currentIndex;
     public static int numButtons = 3;
 
-    bool axisInUse;
-
     // Use this for initialization
     void Awake() {
         menuButtons = new GameObject[numButtons];
@@ -60,8 +58,6 @@ public class ChooseLevel : MenuScreen {
 
             menuButtons[currentIndex].GetComponent<MenuButton>().OnSelectButton();
         }
-
-
     }
 
     public void Cycle(int direction) {
@@ -72,23 +68,11 @@ public class ChooseLevel : MenuScreen {
         do {
 
             currentIndex -= direction;
-
-
             if (currentIndex < 0) {
                 currentIndex = menuButtons.Length - 1;
-
-
-
-
             } else if (currentIndex > menuButtons.Length - 1) {
                 currentIndex = 0;
-
-
-
             }
-
-
-
         } while (!menuButtons[currentIndex].GetComponent<MenuButton>().IsUnlocked);
 
         menuButtons[currentIndex].GetComponent<MenuButton>().IsSelected = true;
@@ -99,13 +83,15 @@ public class ChooseLevel : MenuScreen {
     }
 
     override public void LeavingScreen() {
+        
         menuButtons[currentIndex].GetComponent<MenuButton>().IsSelected = false;
         menuButtons[currentIndex].GetComponent<Animator>().SetBool("isHighlighted", false);
-        currentIndex = 0;
+        
     }
 
     override public void EnteringScreen() {
-        //currentIndex = 0;
+        base.EnteringScreen();
+        currentIndex = 0;
         menuButtons[currentIndex].GetComponent<MenuButton>().IsSelected = true;
         menuButtons[currentIndex].GetComponent<Animator>().SetBool("isHighlighted", true);
     }

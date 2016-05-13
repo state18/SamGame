@@ -3,7 +3,9 @@ using System.Collections;
 
 /// <summary>
 /// Handles the case of the player wanting to enter/exit a ladder from the bottom
+/// FIXME Update: 5/13/2016 It appears this entire script may be useless as the player already stops climbing when hitting the ground.
 /// </summary>
+[System.Obsolete("Don't use this script anymore", true)]
 public class LadderBottom : MonoBehaviour {
     bool inside;
 
@@ -21,12 +23,7 @@ public class LadderBottom : MonoBehaviour {
             if (Input.GetAxisRaw("Vertical") == -1 && cachedPlayer.LadderColliderCount == 0) {
 
                 cachedPlayer.IsClimbing = false;
-
-            } else if (Input.GetAxisRaw("Vertical") == 1) {
-
-                cachedPlayer.IsClimbing = true;
             }
-
         }
     }
 
@@ -43,6 +40,7 @@ public class LadderBottom : MonoBehaviour {
         if (player != null) {
             inside = false;
             player.LadderColliderCount--;
+            Debug.Log(player.LadderColliderCount);
             if (player.LadderColliderCount == 0)
                 player.IsClimbing = false;
         }

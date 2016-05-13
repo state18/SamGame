@@ -34,8 +34,7 @@ public class MenuManager : MonoBehaviour {
                 break;
 
             default:
-                Debug.Log("Invalid screen");
-                break;
+                throw new System.ArgumentException("Invalid destination", destination);
         }
         yield return StartCoroutine(CameraMoveToLocation.Instance.AnimateMovement(prev + "To" + destination));
         screens[activeScreenIndex].enabled = true;
