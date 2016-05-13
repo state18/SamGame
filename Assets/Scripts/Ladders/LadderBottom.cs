@@ -40,7 +40,6 @@ public class LadderBottom : MonoBehaviour {
         if (player != null) {
             inside = false;
             player.LadderColliderCount--;
-            Debug.Log(player.LadderColliderCount);
             if (player.LadderColliderCount == 0)
                 player.IsClimbing = false;
         }

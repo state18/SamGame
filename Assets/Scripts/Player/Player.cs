@@ -91,7 +91,7 @@ public class Player : MonoBehaviour, ITakeDamage {
                 }
 
                 isClimbing = value;
-                _animator.SetBool("isClimbing", IsClimbing);
+                _animator.SetBool("isClimbing", value);
             }
         }
     }
