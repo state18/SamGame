@@ -1,4 +1,7 @@
-﻿using System;
+﻿#if !UNITY_WEBPLAYER
+// Note: This parital class is not compiled in for WebPlayer builds.
+// The Unity Webplayer is deprecated. If you *must* use it then make sure Tiled2Unity assets are imported via another build target first.
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,11 +18,19 @@ namespace Tiled2Unity
     // Concentrates on the Xml file being imported
     partial class ImportTiled2Unity
     {
-        public static readonly string ThisVersion = "0.9.11.1";
+        public static readonly string ThisVersion = "1.0.5.1";
 
-        public void XmlImported(string xmlPath)
+        // Called when Unity detects the *.tiled2unity.xml file needs to be (re)imported
+        public void ImportBegin(string xmlPath)
         {
-            XDocument xml = XDocument.Load(xmlPath);
+            // Normally, this is where we first create the XmlDocument for the whole import.
+            ImportBehaviour importBehaviour = ImportBehaviour.FindOrCreateImportBehaviour(xmlPath);
+            XDocument xml = importBehaviour.XmlDocument;
+            if (xml == null)
+            {
+                Debug.LogError(String.Format("GameObject {0} not successfully initialized. Is it left over from a previous import. Try removing from scene are re-importing {1}.", importBehaviour.gameObject.name, xmlPath));
+                return;
+            }
 
             CheckVersion(xmlPath, xml);
 
@@ -28,6 +39,18 @@ namespace Tiled2Unity
             ImportTexturesFromXml(xml);
             CreateMaterialsFromInternalTextures(xml);
             ImportMeshesFromXml(xml);
+        }
+
+        // Called when the import process has completed and we have a prefab ready to go
+        public void ImportFinished(string prefabPath)
+        {
+            // String the prefab extension
+            string prefabName = Path.GetFileNameWithoutExtension(prefabPath);
+
+            // Get at the import behavour tied to this prefab and remove it from the scene
+            string xmlAssetPath = GetXmlImportAssetPath(prefabName);
+            ImportBehaviour importBehaviour = ImportBehaviour.FindOrCreateImportBehaviour(xmlAssetPath);
+            importBehaviour.DestroyImportBehaviour();
         }
 
         private void CheckVersion(string xmlPath, XDocument xml)
@@ -67,7 +90,7 @@ namespace Tiled2Unity
                     {
                         // We need to create the material afterall
                         // Use our custom shader
-                        material = new Material(Shader.Find("Tiled/TextureTintSnap"));
+                        material = CreateMaterialFromXml(tex);
                         ImportUtils.ReadyToWrite(materialPath);
                         AssetDatabase.CreateAsset(material, materialPath);
                     }
@@ -87,7 +110,7 @@ namespace Tiled2Unity
                 if (material == null)
                 {
                     // Create our material
-                    material = new Material(Shader.Find("Tiled/TextureTintSnap"));
+                    material = CreateMaterialFromXml(tex);
 
                     // Assign to it the texture that is already internal to our Unity project
                     Texture2D texture2d = AssetDatabase.LoadAssetAtPath(texAssetPath, typeof(Texture2D)) as Texture2D;
@@ -98,6 +121,34 @@ namespace Tiled2Unity
                     AssetDatabase.CreateAsset(material, materialPath);
                 }
             }
+        }
+
+        private Material CreateMaterialFromXml(XElement xml)
+        {
+            Material material = null;
+
+            // Does this material support alpha color key?
+            string htmlColor = ImportUtils.GetAttributeAsString(xml, "alphaColorKey", "");
+
+            if (String.IsNullOrEmpty(htmlColor))
+            {
+                // No alpha color key so use a shader with a simplified fragment program
+                material = new Material(Shader.Find("Tiled2Unity/Default"));
+            }
+            else
+            {
+                // Get the HTML color and set the color key on the material shader
+                material = new Material(Shader.Find("Tiled2Unity/Color Key"));
+
+                // Take for granted color is in the form '#RRGGBB'
+                byte r = byte.Parse(htmlColor.Substring(1, 2), System.Globalization.NumberStyles.HexNumber);
+                byte g = byte.Parse(htmlColor.Substring(3, 2), System.Globalization.NumberStyles.HexNumber);
+                byte b = byte.Parse(htmlColor.Substring(5, 2), System.Globalization.NumberStyles.HexNumber);
+                Color color = new Color32(r, g, b, 255);
+                material.SetColor("_AlphaColorKey", color);
+            }
+
+            return material;
         }
 
         private void ImportMeshesFromXml(XDocument xml)
@@ -123,3 +174,4 @@ namespace Tiled2Unity
         }
     }
 }
+#endif

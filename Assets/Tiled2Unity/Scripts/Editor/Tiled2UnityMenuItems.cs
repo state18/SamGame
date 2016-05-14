@@ -12,12 +12,13 @@ namespace Tiled2Unity
 {
     class Tiled2UnityMenuItems
     {
+#if !UNITY_WEBPLAYER
         // Convenience function for packaging this library
         [MenuItem("Tiled2Unity/Export Tiled2Unity Library ...")]
         static void ExportLibrary()
         {
             string name = String.Format("Tiled2Unity.{0}.unitypackage", ImportTiled2Unity.ThisVersion);
-            var path = EditorUtility.SaveFilePanel("Save texture as PNG", "", name, "unitypackage");
+            var path = EditorUtility.SaveFilePanel("Save Tiled2Unity library as unity package.", "", name, "unitypackage");
             if (path.Length != 0)
             {
                 List<string> packageFiles = new List<string>();
@@ -25,6 +26,7 @@ namespace Tiled2Unity
                 AssetDatabase.ExportPackage(packageFiles.ToArray(), path);
             }
         }
+#endif
 
         // Not ready for public consumption yet. (But handy to have for development)
         //[MenuItem("Tiled2Unity/Clean Tiled2Unity Files")]
