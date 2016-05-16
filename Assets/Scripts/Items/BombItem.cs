@@ -12,6 +12,10 @@ public class BombItem : Item
 	public float timeUntilDetonation;
 	private int ongoingBombs = 0;         //no more than 2 at a time
 
+    private void Start() {
+        IsUtility = true;
+    }
+
     /// <summary>
     /// If there are less than 2 active bombs, spawn one.
     /// </summary>

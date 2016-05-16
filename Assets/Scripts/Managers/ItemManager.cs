@@ -21,12 +21,17 @@ public class ItemManager : MonoBehaviour {
     public Image pistolHUD;
     public Image bombHUD;
 
-    private const int size = 3;
+    private const int offensiveSize = 2;
+    private const int utilitySize = 1;
 
-    private GameObject[] items;
-    private Image[] activeItemHUD;
+    private GameObject[] offensiveItems;
+    private GameObject[] utilityItems;
 
-    private int currentIndex;
+    private Image[] activeOffensiveItemHUD;
+    private Image[] activeUtilityItemHUD;
+
+    private int currentOffensiveIndex;
+    private int currentUtilityIndex;
 
     private Player player;
 
@@ -40,24 +45,40 @@ public class ItemManager : MonoBehaviour {
         player = FindObjectOfType<Player>();
 
         // Hard code the following as more items are added to the game. This structure will never change throughout the game.
+        // TODO Perhaps reading in an XML file that contains level data would be a better of doing this.
+        // TODO Instead of tracking currentOffensiveIndex and currentUtilityIndex, perhaps track the active items themselves.
 
-        items = new GameObject[size];
-        activeItemHUD = new Image[size];
-        currentIndex = 0;
+        offensiveItems = new GameObject[offensiveSize];
+        activeOffensiveItemHUD = new Image[offensiveSize];
+        currentOffensiveIndex = 0;
 
-        items[0] = hand;
-        items[1] = pistol;
-        items[2] = bombs;
+        utilityItems = new GameObject[utilitySize];
+        activeUtilityItemHUD = new Image[utilitySize];
+        currentUtilityIndex = 0;
 
-        activeItemHUD[0] = handHUD;
-        activeItemHUD[1] = pistolHUD;
-        activeItemHUD[2] = bombHUD;
+        offensiveItems[0] = hand;
+        offensiveItems[1] = pistol;
+
+        utilityItems[0] = bombs;
+
+        // Handle offensive item HUD
+        activeOffensiveItemHUD[0] = handHUD;
+        activeOffensiveItemHUD[1] = pistolHUD;
+
+        // Handle utility item HUD
+        activeUtilityItemHUD[0] = bombHUD;
 
         // Hand item is initialized. (Player will always have the sword)
-        items[0].GetComponent<Item>().IsObtained = true;
-        items[0].GetComponent<Item>().InHand = true;
-        activeItemHUD[0].GetComponent<Image>().enabled = true;
+        offensiveItems[0].GetComponent<Item>().IsObtained = true;
+        offensiveItems[0].GetComponent<Item>().InHand = true;
+        activeOffensiveItemHUD[0].GetComponent<Image>().enabled = true;
 
+        // Utility slot is initialized with bomb item if the player already has this item.
+        // TODO Later on this should remember the item the player last had equipped for this slot (Read from save file?)
+        if (utilityItems[0].GetComponent<Item>().IsObtained) {
+            utilityItems[0].GetComponent<Item>().InHand = true;
+            activeUtilityItemHUD[0].GetComponent<Image>().enabled = true;
+        }
 
         //items [1].GetComponent<Item> ().IsObtained = true;
         //items [2].GetComponent<Item> ().IsObtained = true;
@@ -67,58 +88,75 @@ public class ItemManager : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         // The only time a player can't swap their items is when they're dead (or in the future, when a cutscene is active)
+        // TODO Don't use KeyCode, make use of the virtual buttons
         if (!player.IsDead) {
             if (Input.GetKeyDown(KeyCode.Q)) {
-                Cycle(-1);
+                CycleItem(offensiveItems[currentOffensiveIndex].GetComponent<Item>());
             }
             if (Input.GetKeyDown(KeyCode.W)) {
-                Cycle(1);
+                CycleItem(utilityItems[currentUtilityIndex].GetComponent<Item>());
             }
         }
 
-        if (Input.GetButtonDown("Use") && player.CanUseItems)
-            items[currentIndex].GetComponent<Item>().Use();
+        // Check to see if offensive item should be used
+        if (Input.GetButtonDown("UseOffensiveItem") && player.CanUseItems)
+            offensiveItems[currentOffensiveIndex].GetComponent<Item>().Use();
 
+        // Check to see if utility item should be used
+        if (Input.GetButtonDown("UseUtilityItem") && utilityItems[currentUtilityIndex].GetComponent<Item>().IsObtained && player.CanUseItems)
+            utilityItems[currentUtilityIndex].GetComponent<Item>().Use();
 
     }
     /// <summary>
-    /// Selects the "next" item
+    /// Selects the "next" item (in the offensive or utility list)
     /// </summary>
-    /// <param name="direction">which adjacent item is chosen</param>
-    public void Cycle(int direction) {
-        items[currentIndex].GetComponent<Item>().InHand = false;
-        activeItemHUD[currentIndex].GetComponent<Image>().enabled = false;
+    /// <param name="item">current item to cycle from</param>
+    public void CycleItem(Item item) {
+        var index = item.index;
+        var itemArray = item.IsUtility ? utilityItems : offensiveItems;
+        var itemHUD = item.IsUtility ? activeUtilityItemHUD : activeOffensiveItemHUD;
 
+        itemArray[index].GetComponent<Item>().InHand = false;
+        itemHUD[index].GetComponent<Image>().enabled = false;
+
+        // For utility items, there could be none obtained, so after all items are checked, the loop will exit.
+        var numChecked = 0;
         do {
+            // There is no obtained item in this array. (Will happen before player unlocks a utility item.)
+            if (numChecked++ > itemArray.Length)
+                return;
 
-            currentIndex += direction;
+            index += 1;
+            if (index > itemArray.Length - 1) 
+                index = 0;
 
-            if (currentIndex < 0) {
-                currentIndex = items.Length - 1;
+        } while (!itemArray[index].GetComponent<Item>().IsObtained);
 
-            } else if (currentIndex > items.Length - 1) {
-                currentIndex = 0;
-            }
+        itemArray[index].GetComponent<Item>().InHand = true;
+        itemHUD[index].GetComponent<Image>().enabled = true;
 
-        } while (!items[currentIndex].GetComponent<Item>().IsObtained);
+        if (item.IsUtility)
+            currentUtilityIndex = index;
+        else
+            currentOffensiveIndex = index;
 
-        items[currentIndex].GetComponent<Item>().InHand = true;
-        activeItemHUD[currentIndex].GetComponent<Image>().enabled = true;
-
-        Debug.Log("Current index:" + currentIndex);
     }
 
     /// <summary>
     /// An item is removed from the player's inventory
     /// </summary>
     /// <param name="index">item to be removed</param>
-    public void DisableItem(int index) {
-        if (items[index].GetComponent<Item>().IsObtained) {
-            items[index].GetComponent<Item>().IsObtained = false;
-            items[index].GetComponent<Item>().InHand = false;
-            activeItemHUD[index].GetComponent<Image>().enabled = false;
-            if (currentIndex == index) {
-                Cycle(1);
+    public void DisableItem(Item item) {
+        var index = item.index;
+        var itemArray = item.IsUtility ? utilityItems : offensiveItems;
+        var itemHUD = item.IsUtility ? activeUtilityItemHUD : activeOffensiveItemHUD;
+
+        if (itemArray[index].GetComponent<Item>().IsObtained) {
+            itemArray[index].GetComponent<Item>().IsObtained = false;
+            itemArray[index].GetComponent<Item>().InHand = false;
+            itemHUD[index].GetComponent<Image>().enabled = false;
+            if (item.IsUtility && currentUtilityIndex == index || !item.IsUtility && currentOffensiveIndex == index) {
+                CycleItem(item);
             }
         }
     }
@@ -127,15 +165,23 @@ public class ItemManager : MonoBehaviour {
     /// An item is added to the player's inventory
     /// </summary>
     /// <param name="index">item to be enabled</param>
-    public void EnableItem(int index) {
-        if (!items[index].GetComponent<Item>().IsObtained) {
-            items[index].GetComponent<Item>().IsObtained = true;
-            items[index].GetComponent<Item>().InHand = true;
-            activeItemHUD[index].GetComponent<Image>().enabled = true;
+    public void EnableItem(Item item) {
+        var index = item.index;
+        var itemArray = item.IsUtility ? utilityItems : offensiveItems;
+        var itemHUD = item.IsUtility ? activeUtilityItemHUD : activeOffensiveItemHUD;
 
-            items[currentIndex].GetComponent<Item>().InHand = false;
-            activeItemHUD[currentIndex].GetComponent<Image>().enabled = false;
-            currentIndex = index;
+        if (!itemArray[index].GetComponent<Item>().IsObtained) {
+            itemArray[currentOffensiveIndex].GetComponent<Item>().InHand = false;
+            itemHUD[currentOffensiveIndex].GetComponent<Image>().enabled = false;
+
+            itemArray[index].GetComponent<Item>().IsObtained = true;
+            itemArray[index].GetComponent<Item>().InHand = true;
+            itemHUD[index].GetComponent<Image>().enabled = true;
+
+            if (item.IsUtility)
+                currentUtilityIndex = index;
+            else
+                currentOffensiveIndex = index;
 
         }
     }
